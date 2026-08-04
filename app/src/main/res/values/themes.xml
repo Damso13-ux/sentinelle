@@ -1,0 +1,6 @@
+<resources>
+    <!-- Base application theme for Compose. -->
+    <style name="Theme.Sentinelle" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+    </style>
+</resources>

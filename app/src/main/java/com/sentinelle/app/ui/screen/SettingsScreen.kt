@@ -1,0 +1,442 @@
+package com.sentinelle.app.ui.screen
+
+import android.content.Context
+import android.content.Intent
+import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChatBubble
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.Code
+import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
+import com.sentinelle.app.service.ListService
+import com.sentinelle.app.ui.sheet.DebugSheet
+import com.sentinelle.app.util.PermissionUtils
+import com.sentinelle.app.worker.ListUpdateWorker
+import kotlinx.coroutines.launch
+
+sealed class SettingsItem {
+    data class Action(
+        val title: String,
+        val subtitle: String? = null,
+        val icon: ImageVector,
+        val onClick: () -> Unit,
+    ) : SettingsItem()
+
+    data class Switch(
+        val title: String,
+        val subtitle: String?,
+        val icon: ImageVector,
+        val checked: Boolean,
+        val onCheckedChange: (Boolean) -> Unit,
+        val enabled: Boolean = true,
+    ) : SettingsItem()
+}
+
+@Composable
+fun SettingsSection(
+    title: String,
+    items: List<SettingsItem>,
+) {
+    Column {
+        Text(
+            text = title,
+            style =
+                MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                ),
+            modifier = Modifier.padding(16.dp),
+        )
+
+        items.forEach { item ->
+            when (item) {
+                is SettingsItem.Action -> {
+                    SettingsActionItem(
+                        title = item.title,
+                        subtitle = item.subtitle,
+                        icon = item.icon,
+                        onClick = item.onClick,
+                    )
+                }
+
+                is SettingsItem.Switch -> {
+                    SettingsSwitchItem(
+                        title = item.title,
+                        subtitle = item.subtitle,
+                        icon = item.icon,
+                        checked = item.checked,
+                        onCheckedChange = item.onCheckedChange,
+                        enabled = item.enabled,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SettingsActionItem(
+    title: String,
+    subtitle: String?,
+    icon: ImageVector,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable { onClick() }
+                .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                )
+            }
+        }
+        Icon(
+            imageVector = Icons.Rounded.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+        )
+    }
+}
+
+@Composable
+fun SettingsSwitchItem(
+    title: String,
+    subtitle: String?,
+    icon: ImageVector,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    enabled: Boolean = true,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .alpha(if (enabled) 1f else 0.38f),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                )
+            }
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            enabled = enabled,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun SettingsScreen(onResetApp: () -> Unit = {}) {
+    val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
+    val coroutineScope = rememberCoroutineScope()
+
+    var showReinstallDialog by remember { mutableStateOf(false) }
+    var showResetDialog by remember { mutableStateOf(false) }
+    var showDebugSheet by remember { mutableStateOf(false) }
+    var bisouTapCount by remember { mutableIntStateOf(0) }
+
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            LargeTopAppBar(
+                title = {
+                    Text(
+                        "Réglages",
+                        fontWeight = FontWeight.ExtraBold,
+                    )
+                },
+                scrollBehavior = scrollBehavior,
+                windowInsets = WindowInsets.statusBars,
+            )
+        },
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+    ) { paddingValues ->
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(scrollState),
+        ) {
+            // Configuration Section
+            SettingsSection(
+                title = "Configuration",
+                items =
+                    listOf(
+                        SettingsItem.Action(
+                            title = "Activer ou désactiver Sentinelle comme application par défaut pour le blocage d'appels",
+                            icon = Icons.Rounded.Settings,
+                            onClick = { PermissionUtils.openCallScreeningSettings(context) },
+                        ),
+                        SettingsItem.Action(
+                            title = "Activer ou désactiver l'accès aux notifications pour le masquage des SMS",
+                            icon = Icons.Rounded.Notifications,
+                            onClick = { PermissionUtils.openNotificationListenerSettings(context) },
+                        ),
+                        SettingsItem.Action(
+                            title = "Réinstaller les listes de blocage",
+                            icon = Icons.Rounded.Refresh,
+                            onClick = { showReinstallDialog = true },
+                        ),
+                        SettingsItem.Action(
+                            title = "Réinitialiser l'application",
+                            icon = Icons.Rounded.DeleteForever,
+                            onClick = { showResetDialog = true },
+                        ),
+                    ),
+            )
+
+            // Links Section
+            SettingsSection(
+                title = "Liens",
+                items =
+                    listOf(
+                        SettingsItem.Action(
+                            title = "Projet d'origine (Saracroche)",
+                            subtitle = "Sentinelle est un fork de Saracroche, sous licence GPLv3.",
+                            icon = Icons.Rounded.Code,
+                            onClick = { openGit(context) },
+                        ),
+                        SettingsItem.Action(
+                            title = "Auteur du projet d'origine (Mastodon @cbouvat)",
+                            icon = Icons.Rounded.ChatBubble,
+                            onClick = { openMastodon(context) },
+                        ),
+                    ),
+            )
+
+            // Footer
+            Text(
+                text = "Version ${
+                    context.packageManager.getPackageInfo(
+                        context.packageName,
+                        0,
+                    ).versionName
+                }\n\nBisou 😘",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .clickable {
+                            bisouTapCount++
+                            if (bisouTapCount >= 3) {
+                                showDebugSheet = true
+                                bisouTapCount = 0
+                            }
+                        },
+            )
+        }
+
+        if (showReinstallDialog) {
+            AlertDialog(
+                onDismissRequest = { showReinstallDialog = false },
+                title = { Text("Réinstaller les listes ?", style = MaterialTheme.typography.headlineSmall) },
+                text = {
+                    Text(
+                        "Les listes seront supprimées puis retéléchargées depuis le serveur.",
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showReinstallDialog = false
+                            val request =
+                                OneTimeWorkRequestBuilder<ListUpdateWorker>()
+                                    .setInputData(workDataOf(ListUpdateWorker.KEY_REINSTALL to true))
+                                    .build()
+                            WorkManager.getInstance(context).enqueueUniqueWork(
+                                ListUpdateWorker.WORK_NAME_LAUNCH,
+                                ExistingWorkPolicy.REPLACE,
+                                request,
+                            )
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Réinstallation lancée.",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        },
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
+                    ) {
+                        Text("Réinstaller", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { showReinstallDialog = false },
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            ),
+                    ) {
+                        Text("Annuler", fontWeight = FontWeight.Bold)
+                    }
+                },
+            )
+        }
+
+        if (showResetDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetDialog = false },
+                title = { Text("Réinitialiser l'application ?") },
+                text = {
+                    Text(
+                        "Toutes les données seront supprimées. L'application repartira comme au premier lancement.",
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showResetDialog = false
+                            coroutineScope.launch {
+                                ListService.resetApp(context)
+                                onResetApp()
+                            }
+                        },
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError,
+                            ),
+                    ) {
+                        Text("Réinitialiser", color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = { showResetDialog = false },
+                        colors =
+                            ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            ),
+                    ) {
+                        Text("Annuler", fontWeight = FontWeight.Bold)
+                    }
+                },
+            )
+        }
+
+        if (showDebugSheet) {
+            DebugSheet(onDismiss = { showDebugSheet = false })
+        }
+    }
+}
+
+// Links functions
+private fun openGit(context: Context) {
+    try {
+        val intent =
+            Intent(Intent.ACTION_VIEW, "https://codeberg.org/cbouvat/saracroche-android".toUri())
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        // Handle error silently
+    }
+}
+
+private fun openMastodon(context: Context) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, "https://mastodon.social/@cbouvat".toUri())
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        // Handle error silently
+    }
+}

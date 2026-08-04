@@ -1,0 +1,30 @@
+Sentinelle
+==========
+
+Sentinelle is a derivative work based on Saracroche, an open-source Android
+call- and SMS-spam blocking application created by cbouvat.
+
+Original project:
+  Name:      Saracroche
+  Author:    cbouvat
+  Source:    https://codeberg.org/cbouvat/saracroche-android
+  License:   GNU General Public License v3.0
+
+Sentinelle forked the Saracroche codebase at version 5.1.1 and, in
+accordance with the terms of the GNU General Public License v3.0, is
+licensed as a whole under the same license (see LICENSE). The complete,
+unmodified license text is preserved in this repository.
+
+Summary of changes made since the fork:
+  - Renamed the application and its package identifier from
+    "Saracroche" (com.cbouvat.android.saracroche) to
+    "Sentinelle" (com.sentinelle.app).
+  - Added a unified blocked-event history covering both calls and SMS,
+    and a statistics/history dashboard.
+  - Added an on-device, rule-based (heuristic) spam-scoring module, with
+    an abstraction designed to later accommodate a trained on-device
+    machine-learning model.
+
+This NOTICE file is provided to satisfy the attribution and "state
+changes" requirements of GPLv3 §5. It does not modify the terms of the
+GPLv3 license under which both Saracroche and Sentinelle are distributed.

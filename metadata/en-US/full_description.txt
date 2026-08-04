@@ -1,0 +1,25 @@
+Note: This application is intended for use in France only.
+
+Sentinelle is an Android app that protects you from unwanted calls and SMS. It is a fork of the open-source Saracroche project (GPLv3), evolving into a broader on-device protection app: spam call/SMS blocking, a local statistics &amp; history dashboard, and an on-device heuristic (rule-based) spam-scoring engine.
+
+<b>Features:</b>
+• Automatically blocks spam numbers and SMS
+• Local statistics &amp; history dashboard for blocked calls/SMS
+• On-device heuristic spam scoring, with no data ever leaving the device
+• Native Android application with modern Material Design 3 UI
+• Privacy-respectful: nothing is uploaded off-device; any local history used for scoring is opt-in and stays on-device
+• Regular updates of the spam number database
+
+<b>Privacy &amp; Security:</b>
+Sentinelle prioritizes your privacy. The app operates locally on your device and doesn't collect or upload any contact list, call log, or personal data. All spam detection — including the optional heuristic scoring — is performed entirely on-device.
+
+<b>How it works:</b>
+The app uses Android's Call Screening Service to automatically identify and block known spam numbers before they can disturb you. When a call comes in, Sentinelle checks the number against its local spam database and, optionally, an on-device heuristic score, then blocks it if identified as spam.
+
+<b>Requirements:</b>
+• Android 10 (API level 29) or higher
+• Permission to be set as the default Phone app for call screening
+• Intended for use in France only
+
+<b>Open Source:</b>
+Sentinelle is open source software and a derivative work of Saracroche (GPLv3) by cbouvat. You can review the code, contribute, or build it yourself from the source.

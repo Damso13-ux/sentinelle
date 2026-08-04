@@ -1,0 +1,68 @@
+# Contributing to Sentinelle
+
+Thank you for considering contributing to Sentinelle! We welcome contributions of all kinds, including bug fixes, feature requests, documentation improvements, and more.
+
+Sentinelle is a fork of [Saracroche](https://codeberg.org/cbouvat/saracroche-android); see [NOTICE](NOTICE) for attribution details.
+
+## How to Contribute
+
+### 1. Fork the Repository
+- Fork this repository to create your own copy.
+
+### 2. Clone the Repository
+- Clone your forked repository to your local machine:
+  ```bash
+  git clone <your-fork-url>
+  cd sentinelle-android
+  ```
+
+### 3. Create a Branch
+- Create a new branch for your feature or bug fix:
+  ```bash
+  git checkout -b feature/your-feature-name
+  ```
+
+### 4. Make Changes
+- Make your changes in the appropriate files.
+- Follow the coding style and conventions used in the project.
+- Ensure your changes are well-documented and tested.
+
+### 5. Commit Your Changes
+- Commit your changes with a clear and concise commit message:
+  ```bash
+  git add .
+  git commit -m "Add a brief description of your changes"
+  ```
+
+### 6. Push Your Changes
+- Push your changes to your forked repository:
+  ```bash
+  git push origin feature/your-feature-name
+  ```
+
+### 7. Open a Pull Request
+- Navigate to the Sentinelle repository.
+- Click the "New Pull Request" button.
+- Select your branch and provide a detailed description of your changes.
+
+## Code of Conduct
+
+Please note that this project is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to abide by its terms.
+
+## Reporting Issues
+
+If you encounter a bug or have a feature request, please open an issue in the project's issue tracker. Provide as much detail as possible to help us address the issue.
+
+## Development Environment
+
+### Prerequisites
+- Android Studio
+
+### Building the Project
+1. Open the project in Android Studio.
+2. Select your target device or simulator.
+3. Build and run the project.
+
+## License
+
+By contributing to Sentinelle, you agree that your contributions will be licensed under the [GNU General Public License v3.0](LICENSE).
