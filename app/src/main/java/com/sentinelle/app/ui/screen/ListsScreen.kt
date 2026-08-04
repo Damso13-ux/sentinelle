@@ -167,7 +167,7 @@ private fun ListSection(
                 containerColor = MaterialTheme.colorScheme.surfaceContainer,
             ),
     ) {
-        if (lists == null || lists.isEmpty()) {
+        if (lists.isNullOrEmpty()) {
             Text(
                 text = emptyMessage,
                 style = MaterialTheme.typography.bodyMedium,

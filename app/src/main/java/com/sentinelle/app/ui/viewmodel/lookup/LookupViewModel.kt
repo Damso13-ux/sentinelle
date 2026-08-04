@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.sentinelle.app.arcep.ArcepNpvPrefixes
 import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.data.NumberLabelEntity
-import com.sentinelle.app.data.PatternListEntity
 import com.sentinelle.app.service.ListPriorityService
 import com.sentinelle.app.util.PhoneNumberMatcher
 import com.sentinelle.app.util.PreferencesManager

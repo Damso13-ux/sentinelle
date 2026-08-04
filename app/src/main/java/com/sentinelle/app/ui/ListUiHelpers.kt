@@ -2,7 +2,6 @@ package com.sentinelle.app.ui
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Block
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Sms
