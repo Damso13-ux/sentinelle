@@ -12,7 +12,10 @@ class HeuristicSpamDetectorTest {
 
     @Test
     fun noHistoryScoresZero() {
-        val result = HeuristicSpamDetector.scoreFromHistory(emptyList(), now = 0L, phoneNumber = 33612345678L)
+        // 33612345678 is deliberately avoided here: its last 6 digits ("345678")
+        // trigger the sequential-digits pattern signal on their own, which would
+        // make this assertion wrong regardless of call history.
+        val result = HeuristicSpamDetector.scoreFromHistory(emptyList(), now = 0L, phoneNumber = 33698427L)
         assertEquals(0.0, result.score, 0.0001)
         assertTrue(result.signals.isEmpty())
     }
