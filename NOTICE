@@ -19,11 +19,37 @@ Résumé des changements effectués depuis le fork :
   - Renommage de l'application et de son identifiant de package, de
     « Saracroche » (com.cbouvat.android.saracroche) à
     « Sentinelle » (com.sentinelle.app).
+  - Refonte visuelle complète (thème sombre « Garde », teal/marine, nouvelle
+    icône de lancement et nouvelle identité visuelle).
   - Ajout d'un historique unifié des événements bloqués couvrant appels et
-    SMS, ainsi qu'un tableau de bord statistique/historique.
+    SMS, avec un tableau de bord statistique/historique affichant la
+    tendance, les numéros les plus bloqués, et la raison de blocage de
+    chaque événement.
   - Ajout d'un module de scoring de spam heuristique (à base de règles) sur
-    l'appareil, avec une abstraction conçue pour accueillir plus tard un
-    modèle de machine learning entraîné localement.
+    l'appareil pour les appels et les SMS, avec un « mode silencieux »
+    permettant d'observer sans bloquer, et une abstraction conçue pour
+    accueillir plus tard un modèle de machine learning entraîné localement.
+  - Ajout de fonctionnalités d'identification de numéro façon Truecaller,
+    strictement locales : écran de recherche/lookup de numéro,
+    labellisation personnelle (« Mes labels »), et intégration de la liste
+    officielle des préfixes de démarchage ARCEP — aucune donnée ne quitte
+    l'appareil, aucun contact n'est envoyé où que ce soit.
+  - Ajout d'une bulle d'identification d'appel affichée à l'écran pendant
+    un appel entrant (fonctionnalité opt-in, nécessite la permission
+    SYSTEM_ALERT_WINDOW).
+  - Ajout d'une action rapide « Ce n'est pas un spam » sur les
+    notifications d'appel bloqué, pour débloquer un numéro en un geste.
+  - Ajout d'un widget d'écran d'accueil et de raccourcis d'application
+    (App Shortcuts) pour un accès rapide.
+  - Ajout d'une détection des réglages d'optimisation de batterie
+    susceptibles d'empêcher un filtrage d'appel fiable (MIUI et
+    équivalents constructeur), avec une carte d'action dans l'application.
+  - Correction de deux comportements hérités de Saracroche : le filtrage
+    de SMS par mot-clé était du code mort inatteignable, et les
+    expéditeurs de SMS alphanumériques contournaient entièrement le
+    filtrage.
+  - Implémentation du scoring heuristique de spam pour les SMS
+    (auparavant un stub renvoyant toujours 0).
 
 Ce fichier NOTICE est fourni pour satisfaire aux exigences d'attribution et
 de « signalement des changements » de la GPLv3 §5. Il ne modifie pas les
