@@ -1,542 +1,542 @@
-# Changelog
+# Journal des modifications
 
-All notable changes to this project will be documented in this file.
+Toutes les modifications notables apportées à ce projet seront documentées dans ce fichier.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+et ce projet respecte le [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Changed
+### Modifié
 
-- Forked from Saracroche v5.1.1 and rebranded as Sentinelle (new package `com.sentinelle.app`); see [NOTICE](NOTICE) for attribution and a summary of changes.
+- Forké depuis Saracroche v5.1.1 et rebrandé en Sentinelle (nouveau package `com.sentinelle.app`) ; voir [NOTICE](NOTICE) pour l'attribution et un résumé des changements.
 
 ## [5.1.1] - 2026-07-22
 
-### Changed
+### Modifié
 
-- Increase list update interval from 12 to 24 hours
+- Augmentation de l'intervalle de mise à jour des listes de 12 à 24 heures
 
 ## [5.1.0] - 2026-07-16
 
-### Added
+### Ajouté
 
-- Add list update interval configuration (12 hours) in Config
-- Add force update capability to ListUpdateWorker with KEY_FORCE_UPDATE input data
-- Trigger force update from AppUpdateReceiver after app updates
+- Ajout de la configuration de l'intervalle de mise à jour des listes (12 heures) dans Config
+- Ajout de la capacité de forcer la mise à jour dans `ListUpdateWorker` via la donnée d'entrée `KEY_FORCE_UPDATE`
+- Déclenchement d'une mise à jour forcée depuis `AppUpdateReceiver` après les mises à jour de l'application
 
-### Changed
+### Modifié
 
-- Update Compose BOM to 2026.06.01 and Kotlin to 2.4.10
-- Refactor phone number reporting to use String type instead of Long throughout the pipeline
-- Remove battery not low constraint from list update work requests
-- Simplify health check request to send empty JSON body
-- Use first country code only for X-Country-Code header
-- Relax phone number validation in ReportViewModel (2-15 digits, accepts + prefix, cleans input)
+- Mise à jour du BOM Compose vers 2026.06.01 et de Kotlin vers 2.4.10
+- Refactorisation du signalement de numéros pour utiliser le type `String` au lieu de `Long` sur toute la chaîne
+- Suppression de la contrainte « batterie non faible » des requêtes de mise à jour des listes
+- Simplification de la requête de health check pour envoyer un corps JSON vide
+- Utilisation du premier indicatif pays uniquement pour l'en-tête `X-Country-Code`
+- Assouplissement de la validation des numéros dans `ReportViewModel` (2 à 15 chiffres, accepte le préfixe +, nettoie la saisie)
 
-### Fixed
+### Corrigé
 
-- Fix phone number type mismatch between client and API
+- Correction d'une incohérence de type de numéro de téléphone entre le client et l'API
 
-### Removed
+### Supprimé
 
-- Remove HealthCheckRequest data class
-- Remove input instruction text from ReportScreen
-- Remove stringToLong helper function from ReportViewModel
+- Suppression de la data class `HealthCheckRequest`
+- Suppression du texte d'instruction de saisie dans `ReportScreen`
+- Suppression de la fonction utilitaire `stringToLong` de `ReportViewModel`
 
 ## [5.0.0] - 2026-06-30
 
-### Added
+### Ajouté
 
-- Add hierarchical list system with `PatternListEntity` and `PatternListItemEntity` database entities for nested pattern organization
-- Add API v2 support with new endpoints: lists, list patterns download, and health check
-- Add `ListService` for updating and managing pattern lists from API
-- Add `ListSyncService` for bidirectional synchronization between local and remote lists
-- Add `ListPriorityService` for sorting lists by priority, type, and name
-- Add `HealthCheckWorker` for periodic device health checks in organization mode
-- Add MDM restrictions support with `restrictions.xml` configuration for enterprise deployments
-- Add new API models: `ListSummary`, `ListPatternInfo`, `HealthCheckRequest`, `HealthCheckResponse`
-- Add `NetworkError` sealed class for structured error handling across network operations
-- Add comprehensive list management UI with new `ListsScreen` and `PatternListSheet` with pagination support
-- Add unit tests for `ListPriorityService`, `ListSyncService`, `NetworkService`, and `ApiModels`
-- Add `applyMdmRestrictions` function to `PreferencesManager` for API key injection in enterprise mode
+- Ajout d'un système de listes hiérarchique avec les entités `PatternListEntity` et `PatternListItemEntity` pour organiser les motifs de façon imbriquée
+- Ajout du support de l'API v2 avec de nouveaux endpoints : listes, téléchargement des motifs de liste, et health check
+- Ajout de `ListService` pour la mise à jour et la gestion des listes de motifs depuis l'API
+- Ajout de `ListSyncService` pour la synchronisation bidirectionnelle entre listes locales et distantes
+- Ajout de `ListPriorityService` pour trier les listes par priorité, type et nom
+- Ajout de `HealthCheckWorker` pour des vérifications périodiques de l'état de l'appareil en mode organisation
+- Ajout du support des restrictions MDM via une configuration `restrictions.xml` pour les déploiements en entreprise
+- Ajout de nouveaux modèles d'API : `ListSummary`, `ListPatternInfo`, `HealthCheckRequest`, `HealthCheckResponse`
+- Ajout de la sealed class `NetworkError` pour une gestion structurée des erreurs réseau
+- Ajout d'une interface complète de gestion des listes avec les nouveaux `ListsScreen` et `PatternListSheet`, avec pagination
+- Ajout de tests unitaires pour `ListPriorityService`, `ListSyncService`, `NetworkService` et `ApiModels`
+- Ajout de la fonction `applyMdmRestrictions` à `PreferencesManager` pour l'injection de clé API en mode entreprise
 
-### Changed
+### Modifié
 
-- **BREAKING:** Migrate database schema from version 1 to 2 with new hierarchical list structure, replacing flat pattern storage
-- Update `AppDatabase` to use new list entities and add seed data for user allow/block lists
-- Update `Config` to use API v2 base URL `app.saracroche.org` and add health check interval constant
-- Update `NetworkService` with new API v2 endpoints and improved error handling with `NetworkError` type
-- Update `CallScreeningService` with better error handling and preference validation checks
-- Update `SaracrocheApplication` to schedule periodic health checks and read MDM configuration on startup
-- Update `MainActivity` navigation to use new unified list screen
-- Update `PreferencesManager` with additional methods for country codes, device management, and MDM restriction application
-- Update `PatternManager` to use new list-based pattern loading with caching and proper cache invalidation
-- Update `PhoneNumberMatcher` with empty input validation to prevent crashes
-- Update build configuration with new test dependencies (mockwebserver, coroutines-test)
-- Reorganize screen files: move from subdirectories (`ui/screen/home/`, `ui/screen/report/`, `ui/screen/settings/`) to root `ui/screen/` directory
-- Update `AGENTS.md` to reflect current tech stack: Kotlin 2, Compose, MVVM, Room 2 (KSP 2), WorkManager 2, DataStore 1, Gson 2, minSdk 29, targetSdk/compileSdk 37, Java 11, Gradle 9, AGP 9
-- Update Gradle wrapper from 9.5.0 to 9.6.0 and dependency versions
-- Remove redundant count method from `BlockedCallDao`
+- **CASSANT :** Migration du schéma de base de données de la version 1 à la 2 avec la nouvelle structure de listes hiérarchique, remplaçant le stockage à plat des motifs
+- Mise à jour d'`AppDatabase` pour utiliser les nouvelles entités de liste et ajout de données initiales pour les listes utilisateur d'autorisation/blocage
+- Mise à jour de `Config` pour utiliser l'URL de base de l'API v2 `app.saracroche.org` et ajout d'une constante d'intervalle de health check
+- Mise à jour de `NetworkService` avec les nouveaux endpoints API v2 et une meilleure gestion des erreurs via le type `NetworkError`
+- Mise à jour de `CallScreeningService` avec une meilleure gestion des erreurs et des vérifications de préférences
+- Mise à jour de `SaracrocheApplication` pour planifier des health checks périodiques et lire la configuration MDM au démarrage
+- Mise à jour de la navigation de `MainActivity` pour utiliser le nouvel écran de listes unifié
+- Mise à jour de `PreferencesManager` avec des méthodes supplémentaires pour les indicatifs pays, la gestion de l'appareil et l'application des restrictions MDM
+- Mise à jour de `PatternManager` pour utiliser le nouveau chargement de motifs basé sur les listes, avec mise en cache et invalidation correcte du cache
+- Mise à jour de `PhoneNumberMatcher` avec validation des entrées vides pour éviter les plantages
+- Mise à jour de la configuration de build avec de nouvelles dépendances de test (mockwebserver, coroutines-test)
+- Réorganisation des fichiers d'écran : déplacement des sous-répertoires (`ui/screen/home/`, `ui/screen/report/`, `ui/screen/settings/`) vers le répertoire racine `ui/screen/`
+- Mise à jour d'`AGENTS.md` pour refléter la stack technique actuelle : Kotlin 2, Compose, MVVM, Room 2 (KSP 2), WorkManager 2, DataStore 1, Gson 2, minSdk 29, targetSdk/compileSdk 37, Java 11, Gradle 9, AGP 9
+- Mise à jour du wrapper Gradle de 9.5.0 à 9.6.0 et des versions de dépendances
+- Suppression d'une méthode de comptage redondante dans `BlockedCallDao`
 
-### Removed
+### Supprimé
 
-- Remove legacy `PatternEntity` and `PatternDao` (replaced by hierarchical `PatternListEntity` and `PatternListItemEntity` system)
-- Remove old list screens: `APIPatternListScreen`, `MyListScreen`, and legacy `ListsScreen`
+- Suppression des anciennes `PatternEntity` et `PatternDao` (remplacées par le système hiérarchique `PatternListEntity`/`PatternListItemEntity`)
+- Suppression des anciens écrans de liste : `APIPatternListScreen`, `MyListScreen`, et l'ancien `ListsScreen`
 
-### Fixed
+### Corrigé
 
-- Add empty input check in `PhoneNumberMatcher` to prevent crashes on null/empty phone numbers
-- Improve error handling in call screening logic with proper preference checks
-- Clear pattern cache after list updates to ensure consistency between local storage and API
-- Add call filtering preference check before processing calls to respect user settings
+- Ajout d'une vérification des entrées vides dans `PhoneNumberMatcher` pour éviter les plantages sur des numéros nuls/vides
+- Amélioration de la gestion des erreurs dans la logique de screening d'appel avec des vérifications de préférences appropriées
+- Vidage du cache de motifs après les mises à jour de liste pour garantir la cohérence entre le stockage local et l'API
+- Ajout d'une vérification de la préférence de filtrage d'appel avant le traitement des appels, pour respecter les réglages utilisateur
 
 ## [4.2.0] - 2026-06-22
 
-### Changed
+### Modifié
 
-- Update API base URL from `saracroche.org` to `app.saracroche.org`
-- Remove `API_LISTS_URL` constant from Config
-- Update dependencies: Compose BOM 2026.05.00 → 2026.06.00, core-ktx 1.18.0 → 1.19.0, Kotlin 2.3.21 → 2.4.0, Lifecycle ViewModel Compose 2.10.0 → 2.11.0, Material 1.13.0 → 1.14.0
+- Mise à jour de l'URL de base de l'API de `saracroche.org` vers `app.saracroche.org`
+- Suppression de la constante `API_LISTS_URL` dans Config
+- Mise à jour des dépendances : Compose BOM 2026.05.00 → 2026.06.00, core-ktx 1.18.0 → 1.19.0, Kotlin 2.3.21 → 2.4.0, Lifecycle ViewModel Compose 2.10.0 → 2.11.0, Material 1.13.0 → 1.14.0
 
 ## [4.1.2] - 2026-06-18
 
-### Changed
+### Modifié
 
-- Consolidate list update logic into a single `ListService.updateList` method with a `force` parameter, unifying the schedule, worker, app-update, reinstall, and reset entry points
-- Skip list download and database rewrite when the remote list version is unchanged
-- Simplify `updateDatabase` to clear all API patterns and bulk-insert the new set
-- Remove duplicate "Download list"/"Update list" buttons and the inline HTTP helper from the debug sheet
+- Consolidation de la logique de mise à jour des listes dans une méthode unique `ListService.updateList` avec un paramètre `force`, unifiant les points d'entrée planification, worker, mise à jour d'app, réinstallation et réinitialisation
+- Passage du téléchargement de liste et de la réécriture de base quand la version de liste distante n'a pas changé
+- Simplification d'`updateDatabase` pour vider tous les motifs API et insérer le nouveau jeu en masse
+- Suppression des boutons dupliqués « Télécharger la liste »/« Mettre à jour la liste » et de l'assistant HTTP inline de la feuille de débogage
 
-### Fixed
+### Corrigé
 
-- Skip non-incoming calls in `CallScreeningService` by responding with an empty `CallResponse` and returning early
+- Ignorance des appels non entrants dans `CallScreeningService` en répondant avec un `CallResponse` vide et un retour anticipé
 
 ## [4.1.1] - 2026-05-30
 
-### Fixed
+### Corrigé
 
-- Fix list update to only delete removed API patterns instead of all
+- Correction de la mise à jour de liste pour ne supprimer que les motifs API retirés, au lieu de tous les supprimer
 
 ## [4.1.0] - 2026-05-13
 
-### Changed
+### Modifié
 
-- Update pattern counting to include both block and identify patterns via new `getTotalPatternCount()` function
-- Rename `calculateTotalBlockedNumbers()` to `calculateTotalCoveredNumbers()` for improved clarity
-- Add DataStore corruption handler for protobuf format changes in PreferencesManager
-- Improve pattern validation error messages in PatternService
-- Refine text and punctuation throughout UI for better clarity
-- Remove redundant echo from Makefile lint command
+- Mise à jour du comptage des motifs pour inclure à la fois les motifs de blocage et d'identification via la nouvelle fonction `getTotalPatternCount()`
+- Renommage de `calculateTotalBlockedNumbers()` en `calculateTotalCoveredNumbers()` pour plus de clarté
+- Ajout d'un gestionnaire de corruption DataStore pour les changements de format protobuf dans `PreferencesManager`
+- Amélioration des messages d'erreur de validation des motifs dans `PatternService`
+- Affinage du texte et de la ponctuation dans toute l'UI pour plus de clarté
+- Suppression d'un echo redondant dans la commande lint du Makefile
 
-### Fixed
+### Corrigé
 
-- Correct variable naming from `totalPatterns` to `totalPatternCount` for consistency
+- Correction du nommage de variable de `totalPatterns` à `totalPatternCount` pour la cohérence
 
 ## [4.0.0] - 2026-05-08
 
-### Added
+### Ajouté
 
-- Add SMS blocking feature via NotificationListenerService to hide SMS notifications from blocked numbers
-- Add SmsNotificationListener service to monitor and filter SMS notifications
-- Add SmsNumberExtractor utility for parsing sender phone numbers from SMS notification extras
-- Add SmsSettingsSheet for configuring SMS blocking toggle and notification preferences
-- Add call identification notifications showing pattern name for matched identify patterns
-- Add CallScreeningFailedDialog guiding users through manual call screening activation
-- Add new notification channels for blocked SMS and identified calls
-- Add blocked SMS notification toggle in preferences
-- Add PhoneNumberMatcher.findMatchingIdentifyPattern for identify pattern matching
-- Add Atkinson Hyperlegible font
-- Add Makefile for running ktlint
-- Add SmsNumberExtractorTest unit tests
+- Ajout du blocage de SMS via `NotificationListenerService` pour masquer les notifications de SMS provenant de numéros bloqués
+- Ajout du service `SmsNotificationListener` pour surveiller et filtrer les notifications de SMS
+- Ajout de l'utilitaire `SmsNumberExtractor` pour extraire le numéro de l'expéditeur depuis les extras de notification SMS
+- Ajout de `SmsSettingsSheet` pour configurer le blocage des SMS et les préférences de notification
+- Ajout de notifications d'identification d'appel affichant le nom du motif pour les motifs d'identification correspondants
+- Ajout de `CallScreeningFailedDialog` guidant l'utilisateur pour l'activation manuelle du screening d'appel
+- Ajout de nouveaux canaux de notification pour les SMS bloqués et les appels identifiés
+- Ajout d'un interrupteur de notification pour les SMS bloqués dans les préférences
+- Ajout de `PhoneNumberMatcher.findMatchingIdentifyPattern` pour la correspondance des motifs d'identification
+- Ajout de la police Atkinson Hyperlegible
+- Ajout d'un Makefile pour lancer ktlint
+- Ajout de tests unitaires `SmsNumberExtractorTest`
 
-### Changed
+### Modifié
 
-- **BREAKING:** Rename filtering preference from `filtering_enabled` to `call_filtering_enabled` to separate call and SMS filtering
-- Upgrade Kotlin from 2.2.20 to 2.3.21
-- Upgrade Gradle from 9.3.1 to 9.5.0 and AGP from 9.1.0 to 9.2.1
-- Upgrade compileSdk and targetSdk from 36 to 37
-- Upgrade dependencies: Gson 2.13.2 → 2.14.0, Compose BOM 2026.03.01 → 2026.05.00, Navigation Compose 2.9.7 → 2.9.8
-- Separate call filtering and SMS blocking as independent toggles in preferences
-- Move list download on launch from Application to MainActivity
-- Add charging requirement to background WorkManager update constraints
-- Reorganize UI package structure: move screens to `ui/screen/` and viewmodels to `ui/viewmodel/`
-- Rename BusinessCodeSheet to BusinessSheet and AdvancedSettingsSheet to CallSettingsSheet
-- Update AGENTS.md with full tech stack documentation
-- Update README.md with SMS blocking feature and expanded technology stack
-- Move launcher icon files from mipmap-anydpi-v26 to mipmap-anydpi
-- Remove font_certs.xml (no longer required)
-- Update .editorconfig with ktlint function naming rule
+- **CASSANT :** Renommage de la préférence de filtrage de `filtering_enabled` à `call_filtering_enabled` pour séparer le filtrage des appels et des SMS
+- Montée de version de Kotlin de 2.2.20 à 2.3.21
+- Montée de version de Gradle de 9.3.1 à 9.5.0 et d'AGP de 9.1.0 à 9.2.1
+- Montée de version de compileSdk et targetSdk de 36 à 37
+- Montée de version des dépendances : Gson 2.13.2 → 2.14.0, Compose BOM 2026.03.01 → 2026.05.00, Navigation Compose 2.9.7 → 2.9.8
+- Séparation du filtrage d'appel et du blocage de SMS en interrupteurs indépendants dans les préférences
+- Déplacement du téléchargement de liste au lancement, d'Application vers MainActivity
+- Ajout d'une exigence de charge à la contrainte de mise à jour WorkManager en arrière-plan
+- Réorganisation de la structure des packages UI : déplacement des écrans vers `ui/screen/` et des viewmodels vers `ui/viewmodel/`
+- Renommage de `BusinessCodeSheet` en `BusinessSheet` et d'`AdvancedSettingsSheet` en `CallSettingsSheet`
+- Mise à jour d'AGENTS.md avec la documentation complète de la stack technique
+- Mise à jour du README.md avec la fonctionnalité de blocage SMS et la stack technique étendue
+- Déplacement des fichiers d'icône de lancement de `mipmap-anydpi-v26` vers `mipmap-anydpi`
+- Suppression de `font_certs.xml` (plus nécessaire)
+- Mise à jour de `.editorconfig` avec une règle de nommage de fonction ktlint
 
 ## [3.1.0] - 2026-04-29
 
-### Added
+### Ajouté
 
-- Add click action to notifications to open MainActivity
+- Ajout d'une action de clic sur les notifications pour ouvrir MainActivity
 
-### Changed
+### Modifié
 
-- Hide blocked calls from call log and notifications
-- Update notification icon vector drawable
-- Move notification permission check to remember state
+- Masquage des appels bloqués du journal d'appels et des notifications
+- Mise à jour du drawable vectoriel de l'icône de notification
+- Déplacement de la vérification de la permission de notification vers un `remember` state
 
-### Fixed
+### Corrigé
 
-- Fix typo in report screen
+- Correction d'une coquille dans l'écran de signalement
 
 ## [3.0.2] - 2026-04-26
 
-### Added
+### Ajouté
 
-- Refresh block lists automatically after app updates via `MY_PACKAGE_REPLACED` broadcast receiver
+- Rafraîchissement automatique des listes de blocage après mise à jour de l'app via le broadcast receiver `MY_PACKAGE_REPLACED`
 
-### Changed
+### Modifié
 
-- Move list update scheduling from MainActivity to Application class for more reliable startup execution
-- Simplify empty blocked calls text and clarify hidden number label to include private numbers
+- Déplacement de la planification de mise à jour des listes de MainActivity vers la classe Application pour une exécution au démarrage plus fiable
+- Simplification du texte d'appels bloqués vides et clarification du libellé des numéros masqués pour inclure les numéros privés
 
 ## [3.0.1] - 2026-04-19
 
-### Fixed
+### Corrigé
 
-- Use `WindowInsets.systemBars` instead of `WindowInsets.statusBars` in all bottom sheets to properly account for navigation bar insets
+- Utilisation de `WindowInsets.systemBars` au lieu de `WindowInsets.statusBars` dans toutes les bottom sheets pour bien prendre en compte les insets de la barre de navigation
 
 ## [3.0.0] - 2026-04-17
 
-### Added
+### Ajouté
 
-- Add Room database for local pattern and blocked call storage (`AppDatabase`, `PatternEntity`, `PatternDao`, `BlockedCallEntity`, `BlockedCallDao`)
-- Add Lists tab in bottom navigation to browse API patterns and manage custom patterns
-- Add user pattern management with add/validate/delete flows, including overlap and duplicate detection
-- Add blocked call notifications with dedicated notification channels for known and unknown blocked calls
-- Add blocked call history in info sheet with per-call phone number, timestamp, and clear-all action
-- Add automatic list updates via WorkManager periodic background download
-- Add advanced settings sheet accessible from home screen for filtering toggle and contacts-only mode
-- Add debug sheet with force update, download list, clear database, and reset preferences actions
-- Add notification permission handling for blocked call notifications (Android 13+ rationale dialog)
-- Add call screening failure dialog guiding users through manual activation steps
-- Add donation dismissal cooldown that hides the donation card for a configurable period after dismissal
+- Ajout d'une base de données Room pour le stockage local des motifs et des appels bloqués (`AppDatabase`, `PatternEntity`, `PatternDao`, `BlockedCallEntity`, `BlockedCallDao`)
+- Ajout d'un onglet Listes dans la navigation basse pour parcourir les motifs API et gérer des motifs personnalisés
+- Ajout de la gestion des motifs utilisateur avec des parcours ajout/validation/suppression, incluant la détection de chevauchement et de doublon
+- Ajout de notifications d'appels bloqués avec des canaux dédiés pour les appels bloqués connus et inconnus
+- Ajout d'un historique des appels bloqués dans la feuille d'info, avec numéro, horodatage et action « tout effacer » par appel
+- Ajout de mises à jour automatiques des listes via un téléchargement périodique en arrière-plan avec WorkManager
+- Ajout d'une feuille de réglages avancés accessible depuis l'écran d'accueil pour le filtrage et le mode contacts uniquement
+- Ajout d'une feuille de débogage avec les actions forcer la mise à jour, télécharger la liste, vider la base et réinitialiser les préférences
+- Ajout de la gestion de la permission de notification pour les appels bloqués (dialogue explicatif Android 13+)
+- Ajout d'un dialogue d'échec de screening d'appel guidant l'utilisateur pour l'activation manuelle
+- Ajout d'un délai de rejet pour la carte de don, la masquant pendant une période configurable après fermeture
 
-### Changed
+### Modifié
 
-- **BREAKING:** Migrate pattern storage from bundled JSON to Room database (patterns now downloaded from API and persisted locally)
-- **BREAKING:** Change phone number handling from `String` to `Long` throughout the call screening pipeline for improved performance
-- Redesign home screen with inline protection controls and info sheet showing blocked call history and background update status
-- Simplify settings screen by moving filtering toggle, block anonymous, and contacts-only switches to home screen/advanced sheet
-- Migrate list download to API endpoint instead of bundled asset file
-- Replace `BlockedPatternManager` with `PatternManager` backed by Room
-- Expand `Config` with API base URL, list endpoint, background/list update intervals, and donation dismiss interval
-- Schedule WorkManager periodic list updates in `MainActivity` and trigger initial download on first launch
-- Upgrade targetSdk/compileSdk from 36 to 37
-- Upgrade dependencies: AGP 9.1.1, Compose BOM 2026.03.01, Activity 1.13.0, Lifecycle 2.10.0, Navigation 2.9.7, DataStore 1.2.1, Room 2.8.4, WorkManager 2.11.2
-- Replace `kotlin-android` plugin with KSP for Room annotation processing
-- Convert UI composable naming from PascalCase to camelCase (e.g. `HomeScreen()` → `homeScreen()`)
-- Update `PhoneNumberMatcher` to use `Long` internally and add `generateVariants()` for multi-prefix matching
+- **CASSANT :** Migration du stockage des motifs d'un JSON embarqué vers une base de données Room (les motifs sont désormais téléchargés depuis l'API et persistés localement)
+- **CASSANT :** Changement de la gestion des numéros de `String` à `Long` sur toute la chaîne de screening d'appel, pour de meilleures performances
+- Refonte de l'écran d'accueil avec des contrôles de protection inline et une feuille d'info affichant l'historique des appels bloqués et le statut des mises à jour en arrière-plan
+- Simplification de l'écran de réglages en déplaçant les interrupteurs de filtrage, blocage anonyme et contacts uniquement vers l'écran d'accueil/la feuille avancée
+- Migration du téléchargement de liste vers un endpoint API au lieu d'un fichier asset embarqué
+- Remplacement de `BlockedPatternManager` par `PatternManager` reposant sur Room
+- Extension de `Config` avec l'URL de base de l'API, l'endpoint de liste, les intervalles de mise à jour arrière-plan/liste, et l'intervalle de rejet du don
+- Planification des mises à jour périodiques de liste via WorkManager dans `MainActivity`, avec déclenchement du téléchargement initial au premier lancement
+- Montée de version de targetSdk/compileSdk de 36 à 37
+- Montée de version des dépendances : AGP 9.1.1, Compose BOM 2026.03.01, Activity 1.13.0, Lifecycle 2.10.0, Navigation 2.9.7, DataStore 1.2.1, Room 2.8.4, WorkManager 2.11.2
+- Remplacement du plugin `kotlin-android` par KSP pour le traitement d'annotations Room
+- Conversion du nommage des composables UI de PascalCase à camelCase (ex. `HomeScreen()` → `homeScreen()`)
+- Mise à jour de `PhoneNumberMatcher` pour utiliser `Long` en interne et ajout de `generateVariants()` pour la correspondance multi-préfixe
 
-### Removed
+### Supprimé
 
-- Remove `BlockedPatternManager.kt` (replaced by `PatternManager` with Room backend)
-- Remove `french-list-arcep-operators.json` bundled asset (patterns now downloaded from API)
+- Suppression de `BlockedPatternManager.kt` (remplacé par `PatternManager` avec Room)
+- Suppression de l'asset embarqué `french-list-arcep-operators.json` (les motifs sont désormais téléchargés depuis l'API)
 
 ## [2.8.0] - 2026-03-25
 
-### Added
+### Ajouté
 
-- Add multi-country prefix support for phone number normalization on multi-SIM devices
-- Add `PhoneNumberMatcher` utility class for centralized phone number processing with improved normalization and pattern matching
-- Refactor device ID retrieval to use app-generated identifiers instead of device-specific ones for enhanced privacy
+- Ajout du support multi-pays des préfixes pour la normalisation des numéros sur les appareils multi-SIM
+- Ajout de la classe utilitaire `PhoneNumberMatcher` pour centraliser le traitement des numéros, avec une normalisation et une correspondance de motifs améliorées
+- Refactorisation de la récupération de l'identifiant d'appareil pour utiliser des identifiants générés par l'app plutôt que spécifiques à l'appareil, pour une meilleure confidentialité
 
-### Changed
+### Modifié
 
-- Update `CallScreeningService` to use new `PhoneNumberMatcher` API with centralized processing
-- Improve wildcard pattern matching logic with better number cleaning
+- Mise à jour de `CallScreeningService` pour utiliser la nouvelle API `PhoneNumberMatcher` avec traitement centralisé
+- Amélioration de la logique de correspondance des motifs à joker avec un meilleur nettoyage des numéros
 
-### Fixed
+### Corrigé
 
-- Fix pattern matching divergence between production and test implementations by unifying logic in `PhoneNumberMatcher`
+- Correction d'une divergence de correspondance de motifs entre les implémentations de production et de test, en unifiant la logique dans `PhoneNumberMatcher`
 
 ## [2.7.0] - 2026-03-20
 
-### Added
+### Ajouté
 
-- Add dismiss button to donation sheet with "Plus tard, non merci" option
+- Ajout d'un bouton de fermeture sur la feuille de don avec l'option « Plus tard, non merci »
 
-### Changed
+### Modifié
 
-- Update blocked call description in info sheet to clarify that blocked calls appear in phone app call log with 🚫 symbol
-- Update project overview and structure in AGENTS.md
+- Mise à jour de la description des appels bloqués dans la feuille d'info pour préciser qu'ils apparaissent dans le journal d'appels du téléphone avec le symbole 🚫
+- Mise à jour de la présentation et de la structure du projet dans AGENTS.md
 
 ## [2.6.0] - 2026-02-27
 
-### Added
+### Ajouté
 
-- Add global filtering toggle to enable/disable call filtering in settings
-- Add contacts-only filtering option to block all calls from non-contacts
-- Add enterprise code input sheet for business fleet protection (centralized management, custom allow lists, reporting, MDM deployment, automatic updates)
-- Add call blocking statistics display with total blocked numbers, blocked patterns, and current filtering settings
-- Add info sheet displaying call blocking statistics and settings
-- Add business code sheet for enterprise code activation
+- Ajout d'un interrupteur global pour activer/désactiver le filtrage d'appel dans les réglages
+- Ajout d'une option de filtrage « contacts uniquement » pour bloquer tous les appels hors contacts
+- Ajout d'une feuille de saisie de code entreprise pour la protection de flotte professionnelle (gestion centralisée, listes d'autorisation personnalisées, reporting, déploiement MDM, mises à jour automatiques)
+- Ajout d'un affichage de statistiques de blocage d'appel avec total des numéros bloqués, motifs bloqués et réglages de filtrage actuels
+- Ajout d'une feuille d'info affichant les statistiques et réglages de blocage d'appel
+- Ajout d'une feuille de code entreprise pour l'activation du code entreprise
 
-### Changed
+### Modifié
 
-- Replace `blocked-patterns.json` with `french-list-arcep-operators.json` using a structured JSON format with metadata and `action` field
-- Reorganize settings screen with global filtering toggle, contacts-only switch, and enterprise code action item
-- Improve home screen with integrated blocked patterns stats, info button, and updated call screening card title
-- Change report icon from `Icons.Rounded.Report` to `Icons.Rounded.Campaign`
-- Enhance call screening permission card with blocked numbers count
-- Remove GitHub Sponsors button from donation sheet and promote Liberapay button to full-width with Euro icon
-- Move donation sheet to `com.cbouvat.android.saracroche.ui.sheet` package and remove unused imports
-- Update documentation: remove outdated JAVA_HOME reference, update iOS repository link and PayPal donation link
-- Update repository links to Codeberg in CONTRIBUTING.md and SettingsScreen
+- Remplacement de `blocked-patterns.json` par `french-list-arcep-operators.json`, avec un format JSON structuré incluant métadonnées et champ `action`
+- Réorganisation de l'écran de réglages avec interrupteur de filtrage global, interrupteur contacts uniquement, et élément d'action code entreprise
+- Amélioration de l'écran d'accueil avec statistiques de motifs bloqués intégrées, bouton d'info, et titre de carte de screening d'appel mis à jour
+- Changement de l'icône de signalement de `Icons.Rounded.Report` à `Icons.Rounded.Campaign`
+- Amélioration de la carte de permission de screening d'appel avec le nombre de numéros bloqués
+- Suppression du bouton GitHub Sponsors de la feuille de don, et mise en avant du bouton Liberapay en pleine largeur avec icône Euro
+- Déplacement de la feuille de don vers le package `com.cbouvat.android.saracroche.ui.sheet` et suppression des imports inutilisés
+- Mise à jour de la documentation : suppression de la référence obsolète à JAVA_HOME, mise à jour du lien du dépôt iOS et du lien de don PayPal
+- Mise à jour des liens de dépôt vers Codeberg dans CONTRIBUTING.md et SettingsScreen
 
-### Removed
+### Supprimé
 
-- Remove contact section from settings screen
-- Remove email bug reporting functionality
-- Remove GitHub Sponsors donation button and `.github/FUNDING.yml`
-- Remove separate `BlockedPatternsStatsCard` (integrated into call screening card)
-- Remove `app/src/main/assets/blocked-patterns.json` (replaced by `french-list-arcep-operators.json`)
+- Suppression de la section contact de l'écran de réglages
+- Suppression du signalement de bug par e-mail
+- Suppression du bouton de don GitHub Sponsors et de `.github/FUNDING.yml`
+- Suppression du composant séparé `BlockedPatternsStatsCard` (intégré à la carte de screening d'appel)
+- Suppression de `app/src/main/assets/blocked-patterns.json` (remplacé par `french-list-arcep-operators.json`)
 
 ## [2.5.0] - 2025-12-25
 
-### Changed
+### Modifié
 
-- Remove 23 BICS operator entries from blocked-patterns.json
-- Update README to announce F-Droid availability with direct download link
-- Replace GitHub Sponsors link with saracroche.org support link in README
-- Remove ARCEP data sources documentation section from README, replace with reference to local JSON file
-- Update versionCode to 21 and versionName to 2.5.0
+- Suppression de 23 entrées d'opérateur BICS dans blocked-patterns.json
+- Mise à jour du README pour annoncer la disponibilité sur F-Droid avec lien de téléchargement direct
+- Remplacement du lien GitHub Sponsors par le lien de soutien saracroche.org dans le README
+- Suppression de la section de documentation des sources de données ARCEP du README, remplacée par une référence au fichier JSON local
+- Mise à jour de versionCode à 21 et versionName à 2.5.0
 
 ## [2.4.0] - 2025-11-11
 
-### Changed
+### Modifié
 
-- Restructure blocked-patterns.json with `start`/`end` numeric range fields, add 26 new operators, remove 3 operators (net decrease from 859 to 827 entries)
-- Update phone screenshots
-- Update versionCode to 20 and versionName to 2.4.0
+- Restructuration de blocked-patterns.json avec des champs de plage numérique `start`/`end`, ajout de 26 nouveaux opérateurs, suppression de 3 opérateurs (baisse nette de 859 à 827 entrées)
+- Mise à jour des captures d'écran du téléphone
+- Mise à jour de versionCode à 20 et versionName à 2.4.0
 
 ## [2.3.0] - 2025-11-11
 
-### Changed
+### Modifié
 
-- Migrate report API to `saracroche.org/api` with new contract (`phone: Long`, `device_id`, `Accept` header)
-- Update website URLs from `cbouvat.com/saracroche` to `saracroche.org`
-- Change Stripe donation link from `buy.stripe.com` to `donate.stripe.com`
-- Add Stripe custom donation link to `.github/FUNDING.yml`
-- Add France-only usage note in app metadata
-- Update LICENSE file to correct GNU General Public License v3.0 text
-- Update versionCode to 19 and versionName to 2.3.0
+- Migration de l'API de signalement vers `saracroche.org/api` avec un nouveau contrat (`phone: Long`, `device_id`, en-tête `Accept`)
+- Mise à jour des URLs du site de `cbouvat.com/saracroche` vers `saracroche.org`
+- Changement du lien de don Stripe de `buy.stripe.com` à `donate.stripe.com`
+- Ajout d'un lien de don Stripe personnalisé dans `.github/FUNDING.yml`
+- Ajout d'une note d'usage France uniquement dans les métadonnées de l'app
+- Mise à jour du fichier LICENSE pour corriger le texte de la GNU General Public License v3.0
+- Mise à jour de versionCode à 19 et versionName à 2.3.0
 
-### Removed
+### Supprimé
 
-- Remove French phone number validation for 12 or 16 digits in `ReportViewModel`
+- Suppression de la validation des numéros français à 12 ou 16 chiffres dans `ReportViewModel`
 
 ## [2.2.0] - 2025-10-22
 
-### Added
+### Ajouté
 
-- Add support for French phone numbers with both 12 and 16 characters (including `+33` prefix)
+- Ajout du support des numéros français à 12 et 16 caractères (incluant le préfixe `+33`)
 
-### Changed
+### Modifié
 
-- Rename `.github/copilot-instructions.md` to `AGENTS.md` with updated title
-- Change terminology in SettingsScreen from "anonymes" to "masques" to "prives"
-- Remove unused `AddComment` and `Help` icon imports and reformat privacy policy intent
-- Remove TODO comment from data extraction rules XML
-- Update versionCode to 18 and versionName to 2.2.0
+- Renommage de `.github/copilot-instructions.md` en `AGENTS.md` avec un titre mis à jour
+- Changement de terminologie dans SettingsScreen : « anonymes » devient « masqués » puis « privés »
+- Suppression des imports d'icônes inutilisés `AddComment` et `Help`, et reformatage de l'intent de la politique de confidentialité
+- Suppression du commentaire TODO du XML des règles d'extraction de données
+- Mise à jour de versionCode à 18 et versionName à 2.2.0
 
 ## [2.1.0] - 2025-10-22
 
-### Added
+### Ajouté
 
-- Add external web links for help and privacy policy in SettingsScreen (replacing in-app HelpScreen)
-- Add "Contact" section in SettingsScreen with email and Mastodon links
-- Add `dependenciesInfo` configuration to exclude dependencies from APK and bundle
+- Ajout de liens web externes pour l'aide et la politique de confidentialité dans SettingsScreen (en remplacement de l'écran d'aide intégré HelpScreen)
+- Ajout d'une section « Contact » dans SettingsScreen avec liens e-mail et Mastodon
+- Ajout de la configuration `dependenciesInfo` pour exclure les dépendances de l'APK et du bundle
 
-### Changed
+### Modifié
 
-- Update icons in SettingsScreen: anonymous call blocking to `Icons.Rounded.PhoneDisabled`, contact developer to `Icons.Rounded.Mail`, new help and privacy icons
-- Move "Bisou" footer text and `openPlayStore()` function from HelpScreen to SettingsScreen
-- Refactor imports, whitespace, and formatting across multiple files
-- Update `distributionSha256Sum` in gradle-wrapper.properties
-- Update versionCode to 17 and versionName to 2.1.0
+- Mise à jour des icônes dans SettingsScreen : blocage d'appel anonyme vers `Icons.Rounded.PhoneDisabled`, contacter le développeur vers `Icons.Rounded.Mail`, nouvelles icônes aide et confidentialité
+- Déplacement du texte de pied de page « Bisou » et de la fonction `openPlayStore()` de HelpScreen vers SettingsScreen
+- Refactorisation des imports, des espaces et du formatage dans plusieurs fichiers
+- Mise à jour de `distributionSha256Sum` dans gradle-wrapper.properties
+- Mise à jour de versionCode à 17 et versionName à 2.1.0
 
-### Removed
+### Supprimé
 
-- Remove HelpScreen file and "Aide" bottom navigation tab (reduced from 4 to 3 tabs)
-- Remove unused coroutine imports from CallScreeningService
+- Suppression du fichier HelpScreen et de l'onglet de navigation « Aide » (passage de 4 à 3 onglets)
+- Suppression des imports de coroutines inutilisés dans CallScreeningService
 
 ## [2.0.0] - 2025-10-22
 
-### Added
+### Ajouté
 
-- Add anonymous/private call blocking feature with DataStore-based preferences and toggle switch
-- Add `datastore-preferences` 1.1.7 to version catalog
+- Ajout du blocage des appels anonymes/privés avec des préférences basées sur DataStore et un interrupteur
+- Ajout de `datastore-preferences` 1.1.7 au catalogue de versions
 
-### Changed
+### Modifié
 
-- Revert AGP version from 8.13.0 to 8.11.1 in libs.versions.toml
-- Update versionCode to 16 and versionName to 2.0.0
+- Retour en arrière de la version d'AGP de 8.13.0 à 8.11.1 dans libs.versions.toml
+- Mise à jour de versionCode à 16 et versionName à 2.0.0
 
-### Fixed
+### Corrigé
 
-- Add missing `platform()` wrapper for Compose BOM test dependency
+- Ajout du wrapper `platform()` manquant pour la dépendance de test Compose BOM
 
-### Removed
+### Supprimé
 
-- Remove `SettingsSection` composable function from SettingsScreen
+- Suppression de la fonction composable `SettingsSection` de SettingsScreen
 
 ## [1.9.0] - 2025-10-22
 
-### Changed
+### Modifié
 
-- Migrate Kotlin compiler options from `kotlinOptions` block to `kotlin { compilerOptions {} }` DSL syntax
-- Update Gradle wrapper to version 9.0.0 with new security properties (`networkTimeout`, `validateDistributionUrl`, `distributionSha256Sum`)
-- Update `gradlew` and `gradlew.bat` for POSIX compliance and improved error handling (part of Gradle 9.0.0 upgrade)
-- Update versionCode to 15 and versionName to 1.9.0
+- Migration des options du compilateur Kotlin du bloc `kotlinOptions` vers la syntaxe DSL `kotlin { compilerOptions {} }`
+- Mise à jour du wrapper Gradle vers la version 9.0.0 avec de nouvelles propriétés de sécurité (`networkTimeout`, `validateDistributionUrl`, `distributionSha256Sum`)
+- Mise à jour de `gradlew` et `gradlew.bat` pour la conformité POSIX et une meilleure gestion des erreurs (dans le cadre de la montée de version Gradle 9.0.0)
+- Mise à jour de versionCode à 15 et versionName à 1.9.0
 
-### Removed
+### Supprimé
 
-- Remove `androidx-ui-test-junit4` from build configuration
+- Suppression d'`androidx-ui-test-junit4` de la configuration de build
 
 ## [1.8.0] - 2025-09-18
 
-### Added
+### Ajouté
 
-- Add app metadata files in English and French (descriptions, titles, screenshots)
-- Add F-Droid availability information to README
-- Add `blocked-patterns.json` with pattern-based format (`operator_name`, `pattern` fields with `#` wildcards)
-- Add `BlockedPatternManager` utility class for loading and matching blocked patterns
+- Ajout de fichiers de métadonnées d'application en anglais et en français (descriptions, titres, captures d'écran)
+- Ajout d'informations sur la disponibilité F-Droid dans le README
+- Ajout de `blocked-patterns.json` avec un format basé sur des motifs (champs `operator_name`, `pattern` avec jokers `#`)
+- Ajout de la classe utilitaire `BlockedPatternManager` pour charger et faire correspondre les motifs bloqués
 
-### Changed
+### Modifié
 
-- Rewrite call screening logic from prefix matching to wildcard pattern matching with `normalizePhoneNumber()` and `matchesPattern()` methods
-- Change `setSkipNotification` from `true` to `false` so blocked calls now generate notifications
-- Replace Send icon with AddAlert icon in ReportScreen
-- Simplify building instructions and remove configuration section in README
-- Update library versions in libs.versions.toml
-- Remove `appVersion` from `ReportRequest` and related logic in `NetworkService`
-- Replace example configuration file (`Config.kt.example`) with actual `Config.kt` and update `.gitignore`
-- Update email contact address in Code of Conduct, Security Policy, HelpScreen, and SettingsScreen
-- Update versionCode to 14 and versionName to 1.8.0
+- Réécriture de la logique de screening d'appel, passant d'une correspondance de préfixe à une correspondance de motifs à joker, avec les méthodes `normalizePhoneNumber()` et `matchesPattern()`
+- Changement de `setSkipNotification` de `true` à `false` : les appels bloqués génèrent désormais des notifications
+- Remplacement de l'icône Send par l'icône AddAlert dans ReportScreen
+- Simplification des instructions de compilation et suppression de la section de configuration dans le README
+- Mise à jour des versions de bibliothèques dans libs.versions.toml
+- Suppression d'`appVersion` de `ReportRequest` et de la logique associée dans `NetworkService`
+- Remplacement du fichier de configuration d'exemple (`Config.kt.example`) par le vrai `Config.kt`, et mise à jour de `.gitignore`
+- Mise à jour de l'adresse e-mail de contact dans le Code de conduite, la Politique de sécurité, HelpScreen et SettingsScreen
+- Mise à jour de versionCode à 14 et versionName à 1.8.0
 
-### Removed
+### Supprimé
 
-- Remove `blocked-prefixes.json` and `BlockedPrefixManager` (replaced by pattern-based system)
+- Suppression de `blocked-prefixes.json` et de `BlockedPrefixManager` (remplacés par le système basé sur les motifs)
 
 ## [1.7.0] - 2025-09-18
 
-### Added
+### Ajouté
 
-- Add "Noter l'application" rating button in DonationSheet
+- Ajout du bouton de notation « Noter l'application » dans DonationSheet
 
-### Changed
+### Modifié
 
-- Replace reusable `DonationButton` composable with inline buttons using `CreditCard` and `Wallet` icons, change "Carte bancaire" text to "Carte bancaire & Google Pay"
-- Translate all inline comments in NetworkService from French to English
-- Update blocked calls description in HomeScreen to present tense
-- Update versionCode to 13 and versionName to 1.7.0
+- Remplacement du composable réutilisable `DonationButton` par des boutons inline utilisant les icônes `CreditCard` et `Wallet`, changement du texte « Carte bancaire » en « Carte bancaire & Google Pay »
+- Traduction de tous les commentaires inline de NetworkService, du français vers l'anglais
+- Mise à jour de la description des appels bloqués dans HomeScreen au présent
+- Mise à jour de versionCode à 13 et versionName à 1.7.0
 
 ## [1.6.0] - 2025-09-18
 
-### Added
+### Ajouté
 
-- Add credit card/Stripe payment option in DonationSheet
-- Add rate app button in DonationSheet
-- Add `SupportSection` composable with email and GitHub issue buttons in HelpScreen
-- Add FAQ entries for 33700 service, ARCEP operator lookup, and troubleshooting in HelpScreen
+- Ajout d'une option de paiement carte bancaire/Stripe dans DonationSheet
+- Ajout d'un bouton de notation de l'app dans DonationSheet
+- Ajout du composable `SupportSection` avec boutons e-mail et issue GitHub dans HelpScreen
+- Ajout d'entrées FAQ pour le service 33700, la recherche d'opérateur ARCEP, et le dépannage dans HelpScreen
 
-### Changed
+### Modifié
 
-- Rewrite color system in `Color.kt` with new base color variables
-- Disable Material You dynamic theming (`dynamicColor` set to `false`)
-- Restructure HomeScreen layout and update content
-- Simplify ReportScreen layout, remove Service 33700 and ARCEP operator cards, change icon to `Send`
-- Reorganize SettingsScreen sections and rename labels
-- Redesign DonationSheet header, enlarge heart icon, and reorder buttons
-- Rework HelpScreen FAQ items and replace bug report section with SupportSection
-- Inline `AppNavigation` into `SaracrocheApp` and remove unused `WindowInsets`
-- Update versionCode to 12 and versionName to 1.6.0
+- Réécriture du système de couleurs dans `Color.kt` avec de nouvelles variables de couleur de base
+- Désactivation du thème dynamique Material You (`dynamicColor` mis à `false`)
+- Restructuration de la mise en page de HomeScreen et mise à jour du contenu
+- Simplification de la mise en page de ReportScreen, suppression des cartes Service 33700 et recherche opérateur ARCEP, changement de l'icône vers `Send`
+- Réorganisation des sections de SettingsScreen et renommage des libellés
+- Refonte de l'en-tête de DonationSheet, agrandissement de l'icône cœur, et réordonnancement des boutons
+- Refonte des éléments FAQ de HelpScreen et remplacement de la section de signalement de bug par SupportSection
+- Inlining d'`AppNavigation` dans `SaracrocheApp` et suppression des `WindowInsets` inutilisés
+- Mise à jour de versionCode à 12 et versionName à 1.6.0
 
-### Removed
+### Supprimé
 
-- Remove Service 33700 card and ARCEP operator lookup card from ReportScreen
-- Remove `AppNavigation` composable (inlined into `SaracrocheApp`)
+- Suppression de la carte Service 33700 et de la carte de recherche opérateur ARCEP dans ReportScreen
+- Suppression du composable `AppNavigation` (inliné dans `SaracrocheApp`)
 
 ## [1.5.0] - 2025-09-18
 
-### Added
+### Ajouté
 
-- Enable code minification (`isMinifyEnabled`) and resource shrinking (`isShrinkResources`) for release builds
-- Add ProGuard rule `-keep class com.cbouvat.android.** { *; }` to prevent class removal
-- Update versionCode to 11 and versionName to 1.5.0
+- Activation de la minification du code (`isMinifyEnabled`) et de la réduction des ressources (`isShrinkResources`) pour les builds release
+- Ajout de la règle ProGuard `-keep class com.cbouvat.android.** { *; }` pour empêcher la suppression de classes
+- Mise à jour de versionCode à 11 et versionName à 1.5.0
 
-### Removed
+### Supprimé
 
-- Remove `applicationIdSuffix = ".debug"` from debug build type
+- Suppression d'`applicationIdSuffix = ".debug"` du type de build debug
 
 ## [1.4.0] - 2025-09-18
 
-### Added
+### Ajouté
 
-- Add COCR operator blocked prefixes to blocked-prefixes.json
+- Ajout des préfixes bloqués de l'opérateur COCR dans blocked-prefixes.json
 
-### Changed
+### Modifié
 
-- Migrate inline dependency declarations in `build.gradle.kts` to version catalog references in `gradle/libs.versions.toml`
-- Update Android Gradle Plugin from 8.11.1 to 8.12.0
-- Disable minification (`isMinifyEnabled`, `isShrinkResources`) and add debug build type configuration
-- Remove commented line for sensitive configurations in Config.kt.example
-- Update versionCode to 8 and versionName to 1.4.0
+- Migration des déclarations de dépendances inline dans `build.gradle.kts` vers des références au catalogue de versions dans `gradle/libs.versions.toml`
+- Mise à jour de l'Android Gradle Plugin de 8.11.1 à 8.12.0
+- Désactivation de la minification (`isMinifyEnabled`, `isShrinkResources`) et ajout d'une configuration de type de build debug
+- Suppression de la ligne commentée pour les configurations sensibles dans Config.kt.example
+- Mise à jour de versionCode à 8 et versionName à 1.4.0
 
 ## [1.3.3] - 2025-09-18
 
-### Changed
+### Modifié
 
-- Refactor SupportProjectCard placement in HomeScreen for improved readability
-- Remove unused `IconButton` import from HomeScreen
-- Update versionCode to 7 and versionName to 1.3.3
+- Refactorisation du placement de SupportProjectCard dans HomeScreen pour une meilleure lisibilité
+- Suppression de l'import `IconButton` inutilisé dans HomeScreen
+- Mise à jour de versionCode à 7 et versionName à 1.3.3
 
 ## [1.2.0] - 2025-09-18
 
-### Added
+### Ajouté
 
-- Add `SupportProjectCard` composable in HomeScreen with donation option
-- Add help item about Sarah ("Pourquoi une patte d'ours ?") in HelpScreen
-- Add question mark to privacy title in HelpScreen
+- Ajout du composable `SupportProjectCard` dans HomeScreen avec option de don
+- Ajout d'un élément d'aide à propos de Sarah (« Pourquoi une patte d'ours ? ») dans HelpScreen
+- Ajout d'un point d'interrogation au titre confidentialité dans HelpScreen
 
-### Changed
+### Modifié
 
-- Reduce bottom padding from 64dp to 32dp and add 64dp spacer in SettingsScreen and HelpScreen to prevent content cutoff
-- Update README.md with correct iOS link and remove French sections for clarity
-- Update versionCode to 3 and versionName to 1.2.0
+- Réduction du padding bas de 64dp à 32dp et ajout d'un spacer de 64dp dans SettingsScreen et HelpScreen pour éviter la coupure de contenu
+- Mise à jour du README.md avec le bon lien iOS et suppression des sections françaises pour plus de clarté
+- Mise à jour de versionCode à 3 et versionName à 1.2.0
 
-### Removed
+### Supprimé
 
-- Remove heart icon button from HomeScreen top app bar (replaced by SupportProjectCard)
+- Suppression du bouton icône cœur de la barre supérieure de HomeScreen (remplacé par SupportProjectCard)
 
 ## [1.1.0] - 2025-09-18
 
-### Added
+### Ajouté
 
-- Add iOS availability notice to README.md
+- Ajout d'une note de disponibilité iOS dans README.md
 
-### Changed
+### Modifié
 
-- Update README.md to reflect current Google Play Store availability status with download link
-- Update versionName to 1.1.0
+- Mise à jour du README.md pour refléter le statut de disponibilité actuel sur Google Play Store avec lien de téléchargement
+- Mise à jour de versionName à 1.1.0
 
 ## [1.0.0] - 2025-09-18
 
-### Added
+### Ajouté
 
-- Release first stable version of Saracroche Android call blocking app
-- Add `CallScreeningService` with `BlockedPrefixManager` for JSON-based prefix loading and pattern matching
-- Add HomeScreen, SettingsScreen, ReportScreen, HelpScreen, and DonationSheet UI components
-- Add `NetworkService`, `ApiModels`, and `ReportViewModel` for phone number reporting
-- Add custom Material 3 theme with Google Fonts integration
-- Add `PermissionUtils` for managing call screening permissions
-- Add initial set of French telemarketing number prefixes in `blocked-prefixes.json`
-- Add project infrastructure: LICENSE, README, CODE_OF_CONDUCT, CONTRIBUTING, SECURITY, FUNDING.yml
-- Add `CallScreeningLogicTest` for call blocking logic validation
-- Add `Config.kt.example` for sensitive configuration management
+- Sortie de la première version stable de l'application Android de blocage d'appel Saracroche
+- Ajout de `CallScreeningService` avec `BlockedPrefixManager` pour le chargement de préfixes basé sur JSON et la correspondance de motifs
+- Ajout des composants UI HomeScreen, SettingsScreen, ReportScreen, HelpScreen et DonationSheet
+- Ajout de `NetworkService`, `ApiModels` et `ReportViewModel` pour le signalement de numéros
+- Ajout d'un thème Material 3 personnalisé avec intégration de Google Fonts
+- Ajout de `PermissionUtils` pour la gestion de la permission de screening d'appel
+- Ajout d'un premier jeu de préfixes de démarchage téléphonique français dans `blocked-prefixes.json`
+- Ajout de l'infrastructure du projet : LICENSE, README, CODE_OF_CONDUCT, CONTRIBUTING, SECURITY, FUNDING.yml
+- Ajout de `CallScreeningLogicTest` pour la validation de la logique de blocage d'appel
+- Ajout de `Config.kt.example` pour la gestion de configuration sensible

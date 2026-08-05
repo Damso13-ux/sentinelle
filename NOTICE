@@ -1,30 +1,31 @@
 Sentinelle
 ==========
 
-Sentinelle is a derivative work based on Saracroche, an open-source Android
-call- and SMS-spam blocking application created by cbouvat.
+Sentinelle est une œuvre dérivée de Saracroche, une application Android
+open source de blocage de spam (appels et SMS) créée par cbouvat.
 
-Original project:
-  Name:      Saracroche
-  Author:    cbouvat
-  Source:    https://codeberg.org/cbouvat/saracroche-android
-  License:   GNU General Public License v3.0
+Projet d'origine :
+  Nom :      Saracroche
+  Auteur :   cbouvat
+  Source :   https://codeberg.org/cbouvat/saracroche-android
+  Licence :  GNU General Public License v3.0
 
-Sentinelle forked the Saracroche codebase at version 5.1.1 and, in
-accordance with the terms of the GNU General Public License v3.0, is
-licensed as a whole under the same license (see LICENSE). The complete,
-unmodified license text is preserved in this repository.
+Sentinelle a forké le code de Saracroche à la version 5.1.1 et, conformément
+aux termes de la GNU General Public License v3.0, est distribué dans son
+ensemble sous la même licence (voir LICENSE). Le texte complet et intact de
+la licence est conservé dans ce dépôt.
 
-Summary of changes made since the fork:
-  - Renamed the application and its package identifier from
-    "Saracroche" (com.cbouvat.android.saracroche) to
-    "Sentinelle" (com.sentinelle.app).
-  - Added a unified blocked-event history covering both calls and SMS,
-    and a statistics/history dashboard.
-  - Added an on-device, rule-based (heuristic) spam-scoring module, with
-    an abstraction designed to later accommodate a trained on-device
-    machine-learning model.
+Résumé des changements effectués depuis le fork :
+  - Renommage de l'application et de son identifiant de package, de
+    « Saracroche » (com.cbouvat.android.saracroche) à
+    « Sentinelle » (com.sentinelle.app).
+  - Ajout d'un historique unifié des événements bloqués couvrant appels et
+    SMS, ainsi qu'un tableau de bord statistique/historique.
+  - Ajout d'un module de scoring de spam heuristique (à base de règles) sur
+    l'appareil, avec une abstraction conçue pour accueillir plus tard un
+    modèle de machine learning entraîné localement.
 
-This NOTICE file is provided to satisfy the attribution and "state
-changes" requirements of GPLv3 §5. It does not modify the terms of the
-GPLv3 license under which both Saracroche and Sentinelle are distributed.
+Ce fichier NOTICE est fourni pour satisfaire aux exigences d'attribution et
+de « signalement des changements » de la GPLv3 §5. Il ne modifie pas les
+termes de la licence GPLv3 sous laquelle Saracroche et Sentinelle sont tous
+deux distribués.

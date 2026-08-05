@@ -2,62 +2,62 @@
 
 ## Description
 
-Sentinelle is an Android app that protects you from unwanted calls and SMS. It started as a fork of [Saracroche](https://codeberg.org/cbouvat/saracroche-android) and is evolving into a broader on-device protection app: spam call/SMS blocking, a local statistics & history dashboard, and an on-device heuristic (rule-based) spam-scoring engine designed to later support a trained on-device machine-learning model.
+Sentinelle est une application Android qui vous protège des appels et SMS indésirables. Le projet a démarré comme un fork de [Saracroche](https://codeberg.org/cbouvat/saracroche-android) et évolue vers une application de protection locale plus large : blocage des appels/SMS indésirables, tableau de bord statistique & historique local, et un moteur de scoring de spam heuristique (à base de règles) fonctionnant entièrement sur l'appareil, conçu pour accueillir plus tard un modèle de machine learning entraîné localement.
 
-## Origin & Acknowledgements
+## Origine & Remerciements
 
-Sentinelle is a derivative work of **Saracroche**, created by [cbouvat](https://codeberg.org/cbouvat) and licensed under the GNU General Public License v3.0. The original project can be found at [codeberg.org/cbouvat/saracroche-android](https://codeberg.org/cbouvat/saracroche-android) (also available on [Google Play](https://play.google.com/store/apps/details?id=com.cbouvat.android.saracroche) and [F-Droid](https://f-droid.org/en/packages/com.cbouvat.android.saracroche/)).
+Sentinelle est une œuvre dérivée de **Saracroche**, créée par [cbouvat](https://codeberg.org/cbouvat) et publiée sous licence GNU General Public License v3.0. Le projet original est disponible sur [codeberg.org/cbouvat/saracroche-android](https://codeberg.org/cbouvat/saracroche-android) (également sur [Google Play](https://play.google.com/store/apps/details?id=com.cbouvat.android.saracroche) et [F-Droid](https://f-droid.org/en/packages/com.cbouvat.android.saracroche/)).
 
-Sentinelle forked the Saracroche codebase at version 5.1.1. See the [NOTICE](NOTICE) file for a summary of changes made since the fork. Huge thanks to cbouvat and the Saracroche contributors for the original work this project builds on.
+Sentinelle a forké le code de Saracroche à la version 5.1.1. Voir le fichier [NOTICE](NOTICE) pour un résumé des changements apportés depuis le fork. Un grand merci à cbouvat et aux contributeurs de Saracroche pour le travail original sur lequel ce projet s'appuie.
 
-## Features
+## Fonctionnalités
 
-- 🛡️ Automatically blocks unwanted numbers
-- 💬 Blocks unwanted SMS messages
-- 📊 Local statistics & history dashboard for blocked calls/SMS
-- 🧠 On-device heuristic spam scoring (no data leaves the device)
-- 📱 Native Android application
-- 🔒 Privacy-respecting: nothing is uploaded off-device; any local history used for scoring is opt-in and stays on-device
-- 🔄 Regular updates of the number database
+- 🛡️ Bloque automatiquement les numéros indésirables
+- 💬 Bloque les SMS indésirables
+- 📊 Tableau de bord statistique & historique local des appels/SMS bloqués
+- 🧠 Scoring de spam heuristique sur l'appareil (aucune donnée ne quitte l'appareil)
+- 📱 Application Android native
+- 🔒 Respect de la vie privée : rien n'est envoyé hors de l'appareil ; tout historique local utilisé pour le scoring est opt-in et reste sur l'appareil
+- 🔄 Mises à jour régulières de la base de numéros
 
 ## Installation
 
-Sentinelle is not yet published on any app store. For now, build it from source:
+Sentinelle n'est pas encore publiée sur un store d'applications. Pour l'instant, il faut la compiler depuis les sources :
 
-### Building from Source
+### Compilation depuis les sources
 
-1. Clone the repository
-2. Open the project in Android Studio
-3. Sync the project with Gradle files
-4. Build and run the project on your device or emulator
+1. Cloner le dépôt
+2. Ouvrir le projet dans Android Studio
+3. Synchroniser le projet avec les fichiers Gradle
+4. Compiler et lancer le projet sur votre appareil ou un émulateur
 
-**Requirements:**
+**Prérequis :**
 
 - Android Studio
-- Android SDK API level 29 or higher
+- Android SDK niveau API 29 ou supérieur
 - Gradle
 
-## Technology Stack
+## Stack technique
 
-- **Kotlin** - Primary programming language
-- **Jetpack Compose** - Modern UI toolkit
-- **MVVM Architecture** - Clean architecture pattern
-- **Android Call Screening API** - For call blocking functionality
-- **Room** - Persistence library
-- **WorkManager** - Background task scheduling
-- **DataStore** - Data storage
-- **Gson** - JSON parsing
+- **Kotlin** - Langage de programmation principal
+- **Jetpack Compose** - Boîte à outils UI moderne
+- **Architecture MVVM** - Séparation claire des responsabilités
+- **Android Call Screening API** - Pour le blocage d'appels
+- **Room** - Bibliothèque de persistance
+- **WorkManager** - Planification des tâches en arrière-plan
+- **DataStore** - Stockage des données
+- **Gson** - Parsing JSON
 
-## Contributing
+## Contribuer
 
-Contributions are welcome! Here's how you can help:
+Les contributions sont les bienvenues ! Voici comment participer :
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Forker le dépôt
+2. Créer une nouvelle branche (`git checkout -b feature/ma-super-fonctionnalite`)
+3. Commiter vos changements (`git commit -m "Ajout d'une super fonctionnalité"`)
+4. Pousser la branche (`git push origin feature/ma-super-fonctionnalite`)
+5. Ouvrir une Pull Request
 
-## License
+## Licence
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details. As a derivative of Saracroche, it remains GPLv3-licensed as a whole; see [NOTICE](NOTICE) for attribution details.
+Ce projet est distribué sous licence GNU General Public License v3.0 - voir le fichier [LICENSE](LICENSE) pour les détails. En tant qu'œuvre dérivée de Saracroche, il reste intégralement sous licence GPLv3 ; voir [NOTICE](NOTICE) pour les détails d'attribution.

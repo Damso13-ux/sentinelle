@@ -1,68 +1,68 @@
-# Contributing to Sentinelle
+# Contribuer à Sentinelle
 
-Thank you for considering contributing to Sentinelle! We welcome contributions of all kinds, including bug fixes, feature requests, documentation improvements, and more.
+Merci d'envisager de contribuer à Sentinelle ! Nous accueillons toutes sortes de contributions : corrections de bugs, demandes de fonctionnalités, améliorations de la documentation, et plus encore.
 
-Sentinelle is a fork of [Saracroche](https://codeberg.org/cbouvat/saracroche-android); see [NOTICE](NOTICE) for attribution details.
+Sentinelle est un fork de [Saracroche](https://codeberg.org/cbouvat/saracroche-android) ; voir [NOTICE](NOTICE) pour les détails d'attribution.
 
-## How to Contribute
+## Comment contribuer
 
-### 1. Fork the Repository
-- Fork this repository to create your own copy.
+### 1. Forker le dépôt
+- Forkez ce dépôt pour créer votre propre copie.
 
-### 2. Clone the Repository
-- Clone your forked repository to your local machine:
+### 2. Cloner le dépôt
+- Clonez votre fork sur votre machine locale :
   ```bash
-  git clone <your-fork-url>
+  git clone <url-de-votre-fork>
   cd sentinelle-android
   ```
 
-### 3. Create a Branch
-- Create a new branch for your feature or bug fix:
+### 3. Créer une branche
+- Créez une nouvelle branche pour votre fonctionnalité ou correction :
   ```bash
-  git checkout -b feature/your-feature-name
+  git checkout -b feature/nom-de-votre-fonctionnalite
   ```
 
-### 4. Make Changes
-- Make your changes in the appropriate files.
-- Follow the coding style and conventions used in the project.
-- Ensure your changes are well-documented and tested.
+### 4. Faire vos modifications
+- Apportez vos modifications dans les fichiers appropriés.
+- Respectez le style de code et les conventions utilisées dans le projet.
+- Assurez-vous que vos modifications sont bien documentées et testées.
 
-### 5. Commit Your Changes
-- Commit your changes with a clear and concise commit message:
+### 5. Commiter vos modifications
+- Commitez vos modifications avec un message clair et concis :
   ```bash
   git add .
-  git commit -m "Add a brief description of your changes"
+  git commit -m "Décrivez brièvement vos modifications"
   ```
 
-### 6. Push Your Changes
-- Push your changes to your forked repository:
+### 6. Pousser vos modifications
+- Poussez vos modifications vers votre fork :
   ```bash
-  git push origin feature/your-feature-name
+  git push origin feature/nom-de-votre-fonctionnalite
   ```
 
-### 7. Open a Pull Request
-- Navigate to the Sentinelle repository.
-- Click the "New Pull Request" button.
-- Select your branch and provide a detailed description of your changes.
+### 7. Ouvrir une Pull Request
+- Rendez-vous sur le dépôt Sentinelle.
+- Cliquez sur le bouton « New Pull Request ».
+- Sélectionnez votre branche et fournissez une description détaillée de vos modifications.
 
-## Code of Conduct
+## Code de conduite
 
-Please note that this project is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to abide by its terms.
+Notez que ce projet est régi par le [Code de conduite](CODE_OF_CONDUCT.md). En y participant, vous acceptez d'en respecter les termes.
 
-## Reporting Issues
+## Signaler des problèmes
 
-If you encounter a bug or have a feature request, please open an issue in the project's issue tracker. Provide as much detail as possible to help us address the issue.
+Si vous rencontrez un bug ou avez une demande de fonctionnalité, merci d'ouvrir une issue dans le suivi des tickets du projet. Fournissez autant de détails que possible pour nous aider à traiter le problème.
 
-## Development Environment
+## Environnement de développement
 
-### Prerequisites
+### Prérequis
 - Android Studio
 
-### Building the Project
-1. Open the project in Android Studio.
-2. Select your target device or simulator.
-3. Build and run the project.
+### Compiler le projet
+1. Ouvrez le projet dans Android Studio.
+2. Sélectionnez votre appareil cible ou un simulateur.
+3. Compilez et lancez le projet.
 
-## License
+## Licence
 
-By contributing to Sentinelle, you agree that your contributions will be licensed under the [GNU General Public License v3.0](LICENSE).
+En contribuant à Sentinelle, vous acceptez que vos contributions soient distribuées sous la licence [GNU General Public License v3.0](LICENSE).

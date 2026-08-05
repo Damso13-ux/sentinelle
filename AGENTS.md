@@ -1,8 +1,8 @@
 # AGENTS.md
 
-Sentinelle is an Android call/SMS blocking app using Android's CallScreeningService API. It is a fork of Saracroche (GPLv3) — see NOTICE.
+Sentinelle est une application Android de blocage d'appels/SMS utilisant l'API `CallScreeningService` d'Android. C'est un fork de Saracroche (GPLv3) — voir NOTICE.
 
-## Tech Stack
+## Stack technique
 
 - Kotlin 2
 - Compose
@@ -14,19 +14,19 @@ Sentinelle is an Android call/SMS blocking app using Android's CallScreeningServ
 - minSdk 29, targetSdk/compileSdk 37, Java 11
 - Gradle 9, AGP 9
 
-## Guidelines
+## Consignes
 
-- `Icons.Rounded` for Material icons by default
-- Patterns use `#` as trailing-only wildcard (e.g. `33162######`)
-- Run `make lint` after each code modification
-- Don't commit
+- `Icons.Rounded` pour les icônes Material par défaut
+- Les motifs utilisent `#` comme joker en fin de chaîne uniquement (ex. `33162######`)
+- Lancer `make lint` après chaque modification de code
+- Ne pas commit
 
-## Commands
+## Commandes
 
 ```bash
-gradle build                # Build project
-gradle test                 # Run unit tests
-gradle assembleDebug        # Build debug APK
+gradle build                # Compile le projet
+gradle test                 # Lance les tests unitaires
+gradle assembleDebug        # Compile l'APK de debug
 gradle app:lint             # Android Lint
-make lint                   # Kotlin lint (format + style)
+make lint                   # Lint Kotlin (formatage + style)
 ```

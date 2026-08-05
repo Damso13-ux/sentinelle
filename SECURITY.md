@@ -1,7 +1,7 @@
-# Security Policy
+# Politique de sécurité
 
-If you discover a security vulnerability, please report it to us privately.
+Si vous découvrez une faille de sécurité, merci de nous la signaler en privé.
 
-<!-- TODO: replace with Sentinelle's own contact address before publishing this repository. -->
+<!-- TODO : remplacer par l'adresse de contact propre à Sentinelle avant de publier ce dépôt. -->
 
-We will respond as quickly as possible to address the issue.
+Nous répondrons aussi rapidement que possible pour traiter le problème.
