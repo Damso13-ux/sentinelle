@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Sentinelle</string>
+    <string name="shortcut_lookup_short">Recherche</string>
+    <string name="shortcut_lookup_long">Rechercher un numéro</string>
+    <string name="shortcut_report_short">Signaler</string>
+    <string name="shortcut_report_long">Signaler un numéro</string>
 </resources>

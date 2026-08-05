@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="lookup"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_lookup"
+        android:shortcutShortLabel="@string/shortcut_lookup_short"
+        android:shortcutLongLabel="@string/shortcut_lookup_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.sentinelle.app"
+            android:targetClass="com.sentinelle.app.MainActivity">
+            <extra
+                android:name="shortcut_destination"
+                android:value="lookup" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="report"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_report"
+        android:shortcutShortLabel="@string/shortcut_report_short"
+        android:shortcutLongLabel="@string/shortcut_report_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.sentinelle.app"
+            android:targetClass="com.sentinelle.app.MainActivity">
+            <extra
+                android:name="shortcut_destination"
+                android:value="report" />
+        </intent>
+    </shortcut>
+</shortcuts>

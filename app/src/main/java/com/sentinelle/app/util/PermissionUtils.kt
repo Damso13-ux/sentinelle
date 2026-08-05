@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import android.telecom.TelecomManager
 import android.util.Log
@@ -193,6 +194,44 @@ object PermissionUtils {
         } else {
             true
         }
+
+    /**
+     * Whether the system is free to kill Sentinelle in the background to
+     * save power. On aggressive OEM skins (MIUI in particular), this can
+     * silently break call/SMS screening while the app isn't in the
+     * foreground — see openBatteryOptimizationSettings.
+     */
+    fun isIgnoringBatteryOptimizations(context: Context): Boolean {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as? PowerManager ?: return true
+        return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+    }
+
+    /**
+     * Directly prompts the system "allow this app to ignore battery
+     * optimizations?" dialog for Sentinelle, rather than sending the user
+     * into a generic settings list to find the app themselves.
+     */
+    fun openBatteryOptimizationSettings(context: Context) {
+        try {
+            val intent =
+                Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                    data = "package:${context.packageName}".toUri()
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+            context.startActivity(intent)
+        } catch (t: Throwable) {
+            Log.e(TAG, "Error opening battery optimization request", t)
+            try {
+                val fallback =
+                    Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                context.startActivity(fallback)
+            } catch (t2: Throwable) {
+                Log.e(TAG, "Error opening battery optimization settings list", t2)
+            }
+        }
+    }
 
     /**
      * Open the system screen where the user grants the "draw over other apps"

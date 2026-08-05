@@ -1,5 +1,6 @@
 package com.sentinelle.app
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.graphics.Color as AndroidColor
@@ -22,7 +23,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
@@ -65,6 +69,8 @@ private val bottomNavItems =
     )
 
 class MainActivity : ComponentActivity() {
+    private var shortcutDestination by mutableStateOf<String?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Sentinelle always renders its dark "Garde" theme, so status/nav bar
@@ -76,12 +82,24 @@ class MainActivity : ComponentActivity() {
 
         NotificationUtils.createAllNotificationChannels(this)
         downloadListOnLaunchIfNeeded()
+        shortcutDestination = intent?.getStringExtra(EXTRA_SHORTCUT_DESTINATION)
 
         setContent {
             AppTheme {
-                SentinelleApp()
+                SentinelleApp(
+                    shortcutDestination = shortcutDestination,
+                    onShortcutDestinationConsumed = { shortcutDestination = null },
+                )
             }
         }
+    }
+
+    // Handles the app shortcuts (long-press the launcher icon) when the
+    // Activity is already running — onCreate only fires on a cold start.
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        shortcutDestination = intent.getStringExtra(EXTRA_SHORTCUT_DESTINATION)
     }
 
     private fun downloadListOnLaunchIfNeeded() {
@@ -101,12 +119,30 @@ class MainActivity : ComponentActivity() {
             updateRequest,
         )
     }
+
+    companion object {
+        // Matches the <extra android:name="shortcut_destination"> in
+        // res/xml/shortcuts.xml.
+        const val EXTRA_SHORTCUT_DESTINATION = "shortcut_destination"
+    }
 }
 
 @Preview
 @Composable
-fun SentinelleApp() {
+fun SentinelleApp(
+    shortcutDestination: String? = null,
+    onShortcutDestinationConsumed: () -> Unit = {},
+) {
     val navController = rememberNavController()
+
+    LaunchedEffect(shortcutDestination) {
+        if (shortcutDestination != null) {
+            navController.navigate(shortcutDestination) {
+                popUpTo(navController.graph.findStartDestination().id)
+            }
+            onShortcutDestinationConsumed()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
