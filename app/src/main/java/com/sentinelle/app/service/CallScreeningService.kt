@@ -173,7 +173,7 @@ class CallScreeningService : CallScreeningService() {
                             null
                         }
                     }
-                NotificationService.sendBlockedCallNotification(this, rawPhoneNumber ?: "", label)
+                NotificationService.sendBlockedCallNotification(this, rawPhoneNumber ?: "", label, phoneNumber)
             }
         } else {
             Log.d(TAG, "Allowing call from: $rawPhoneNumber")

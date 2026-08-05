@@ -11,6 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.sentinelle.app.MainActivity
 import com.sentinelle.app.R
+import com.sentinelle.app.receiver.UnblockActionReceiver
 import com.sentinelle.app.util.NotificationUtils
 
 object NotificationService {
@@ -21,11 +22,12 @@ object NotificationService {
         context: Context,
         phoneNumber: String?,
         label: String? = null,
+        normalizedPhoneNumber: Long? = null,
     ) {
         if (phoneNumber.isNullOrBlank()) {
             sendUnknownBlockedCallNotification(context)
         } else {
-            sendKnownBlockedCallNotification(context, phoneNumber, label)
+            sendKnownBlockedCallNotification(context, phoneNumber, label, normalizedPhoneNumber)
         }
     }
 
@@ -50,6 +52,7 @@ object NotificationService {
         context: Context,
         phoneNumber: String,
         label: String? = null,
+        normalizedPhoneNumber: Long? = null,
     ) {
         Log.d(TAG, "Sending notification for blocked call from: $phoneNumber")
 
@@ -64,6 +67,22 @@ object NotificationService {
                 .setContentText(contentText)
                 .setPriority(NotificationUtils.BLOCKED_CALLS_NOTIFICATION_PRIORITY)
                 .setAutoCancel(true)
+
+        if (normalizedPhoneNumber != null) {
+            val unblockIntent =
+                Intent(context, UnblockActionReceiver::class.java).apply {
+                    putExtra(UnblockActionReceiver.EXTRA_PHONE_NUMBER, normalizedPhoneNumber)
+                    putExtra(UnblockActionReceiver.EXTRA_NOTIFICATION_ID, notificationId)
+                }
+            val unblockPendingIntent =
+                PendingIntent.getBroadcast(
+                    context,
+                    notificationId,
+                    unblockIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                )
+            notification.addAction(NOTIFICATION_ICON, "Ce n'est pas un spam", unblockPendingIntent)
+        }
 
         send(context, notificationId, notification)
     }
