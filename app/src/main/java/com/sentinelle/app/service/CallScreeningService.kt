@@ -16,6 +16,7 @@ import com.sentinelle.app.util.PatternManager
 import com.sentinelle.app.util.PermissionUtils
 import com.sentinelle.app.util.PhoneNumberMatcher
 import com.sentinelle.app.util.PreferencesManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 
 class CallScreeningService : CallScreeningService() {
@@ -29,6 +30,19 @@ class CallScreeningService : CallScreeningService() {
             return
         }
 
+        // CallScreeningService has no async response path — respondToCall()
+        // must be called before this callback returns, so the decision can't
+        // be a fire-and-forget coroutine. But onScreenCall may run on the
+        // app's main thread, and the decision now does real DB/DataStore I/O
+        // (pattern lists, call history, heuristic scoring) — dispatch that
+        // work to Dispatchers.IO explicitly rather than letting it execute
+        // wherever this callback happened to be invoked from.
+        runBlocking(Dispatchers.IO) {
+            screenCall(callDetails)
+        }
+    }
+
+    private fun screenCall(callDetails: Call.Details) {
         if (!runBlocking {
                 try {
                     PreferencesManager.isCallFilteringEnabled(this@CallScreeningService)
