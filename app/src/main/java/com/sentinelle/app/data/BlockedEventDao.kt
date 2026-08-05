@@ -34,6 +34,9 @@ interface BlockedEventDao {
     @Query("SELECT COUNT(*) FROM blocked_events")
     fun getCountFlow(): Flow<Int>
 
+    @Query("SELECT COUNT(*) FROM blocked_events")
+    fun getTotalCount(): Int
+
     @Query("SELECT COUNT(*) FROM blocked_events WHERE channel = :channel")
     fun getCountByChannelFlow(channel: String): Flow<Int>
 

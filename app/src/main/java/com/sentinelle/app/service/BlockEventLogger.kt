@@ -4,6 +4,7 @@ import android.content.Context
 import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.data.BlockedEventEntity
 import com.sentinelle.app.util.BlockSource
+import com.sentinelle.app.widget.SentinelleWidgetProvider
 
 // Shared by CallScreeningService and SmsNotificationListener so both channels
 // log into the same blocked_events table with a consistent reason mapping.
@@ -44,6 +45,8 @@ object BlockEventLogger {
                     heuristicReason = heuristicReason,
                 ),
             )
+
+        SentinelleWidgetProvider.requestUpdate(context)
     }
 
     private data class Reason(
