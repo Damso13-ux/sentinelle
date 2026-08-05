@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -294,6 +295,11 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                             icon = Icons.Rounded.ChatBubble,
                             onClick = { openMastodon(context) },
                         ),
+                        SettingsItem.Action(
+                            title = "Politique de confidentialité",
+                            icon = Icons.Rounded.Shield,
+                            onClick = { openPrivacyPolicy(context) },
+                        ),
                     ),
             )
 
@@ -435,6 +441,15 @@ private fun openGit(context: Context) {
 private fun openMastodon(context: Context) {
     try {
         val intent = Intent(Intent.ACTION_VIEW, "https://mastodon.social/@cbouvat".toUri())
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        // Handle error silently
+    }
+}
+
+private fun openPrivacyPolicy(context: Context) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, "https://damso13-ux.github.io/sentinelle/".toUri())
         context.startActivity(intent)
     } catch (e: Exception) {
         // Handle error silently

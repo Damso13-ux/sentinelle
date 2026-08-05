@@ -25,9 +25,12 @@ android {
         applicationId = "com.sentinelle.app"
         minSdk = 29
         targetSdk = 37
-        versionCode = 36
+        // Sentinelle is its own app identity now, distinct from the
+        // Saracroche fork point — starting a clean version history rather
+        // than carrying over Saracroche's 5.1.1/36.
+        versionCode = 1
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionName = "5.1.1"
+        versionName = "1.0.0"
     }
 
     signingConfigs {
