@@ -73,12 +73,18 @@ class SmsNotificationListener : NotificationListenerService() {
                 bigText = extras.getString("android.bigText"),
                 charSequenceText = extras.getCharSequence("android.text"),
             )
-        if (senderNumber == null) {
-            Log.w(TAG, "Could not extract sender number from notification extras")
+        // Kept separate from sender extraction: some senders use short
+        // alphanumeric IDs ("FreeMobile", marketing short codes...) with no
+        // phone number at all — content-based keyword lists still need to
+        // see the text, so we no longer bail out just because there's no
+        // resolvable number.
+        val messageText = extras.getString("android.bigText") ?: extras.getString("android.text")
+        if (senderNumber == null && messageText.isNullOrBlank()) {
+            Log.w(TAG, "Could not extract sender number or message text from notification extras")
             return
         }
 
-        Log.d(TAG, "SMS notification from: $senderNumber (package: ${sbn.packageName})")
+        Log.d(TAG, "SMS notification from: ${senderNumber ?: "unknown sender"} (package: ${sbn.packageName})")
 
         val notificationKey = sbn.key
 
@@ -96,11 +102,9 @@ class SmsNotificationListener : NotificationListenerService() {
                     }
 
                 val phoneNumber =
-                    PhoneNumberMatcher.normalizePhoneNumber(senderNumber, countryPrefixes).firstOrNull()
+                    senderNumber?.let { PhoneNumberMatcher.normalizePhoneNumber(it, countryPrefixes).firstOrNull() }
                 val action =
-                    phoneNumber?.let {
-                        PatternManager.evaluateSms(it, countryPrefixes, this@SmsNotificationListener)
-                    }
+                    PatternManager.evaluateSms(phoneNumber, messageText, countryPrefixes, this@SmsNotificationListener)
 
                 if (phoneNumber != null) {
                     try {
@@ -126,7 +130,9 @@ class SmsNotificationListener : NotificationListenerService() {
                 if (action is SmsAction.Hide) {
                     Log.d(
                         TAG,
-                        "Masquage de la notification de SMS indésirable depuis : $senderNumber (le SMS n'est pas bloqué, seule la notification est masquée)",
+                        "Masquage de la notification de SMS indésirable depuis : " +
+                            "${senderNumber ?: "expéditeur inconnu"} " +
+                            "(le SMS n'est pas bloqué, seule la notification est masquée)",
                     )
                     cancelNotification(notificationKey)
 
@@ -147,7 +153,7 @@ class SmsNotificationListener : NotificationListenerService() {
                         withContext(Dispatchers.Main) {
                             NotificationService.sendBlockedSmsNotification(
                                 this@SmsNotificationListener,
-                                senderNumber,
+                                senderNumber ?: "Expéditeur inconnu",
                             )
                         }
                     }

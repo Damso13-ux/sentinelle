@@ -118,6 +118,24 @@ object PatternManager {
         return null
     }
 
+    // SMS-channel lists hold keywords, not number patterns (see the "Mots-clés
+    // SMS" label in ListUiHelpers) — matched as a simple case-insensitive
+    // substring against the message body. Works even without a resolvable
+    // sender number, unlike findListMatch.
+    private fun findKeywordMatch(
+        messageText: String,
+        lists: List<CachedList>,
+    ): Pair<CachedList, BlockedPattern>? {
+        for (list in lists) {
+            val matched =
+                list.patterns.firstOrNull { pattern ->
+                    pattern.pattern.isNotBlank() && messageText.contains(pattern.pattern, ignoreCase = true)
+                }
+            if (matched != null) return list to matched
+        }
+        return null
+    }
+
     fun evaluateCall(
         phoneNumber: Long,
         prefixes: Set<String>,
@@ -154,36 +172,59 @@ object PatternManager {
     }
 
     fun evaluateSms(
-        phoneNumber: Long,
+        phoneNumber: Long?,
+        messageText: String?,
         prefixes: Set<String>,
         context: Context,
     ): SmsAction {
-        val lists =
-            loadCache(context).filter {
-                it.channel == PatternListEntity.CHANNEL_PHONE || it.channel == PatternListEntity.CHANNEL_SMS
-            }
-        val match = findListMatch(phoneNumber, prefixes, lists)
-        if (match != null) {
-            val (list, pattern) = match
-            return if (list.type == PatternListEntity.TYPE_BLOCK) {
-                SmsAction.Hide(BlockSource.PatternMatch(list.listId, pattern.name))
-            } else {
-                SmsAction.Keep
+        val allLists = loadCache(context)
+
+        // Phone-number lists also apply to SMS: a sender already on a call
+        // block/allow list is treated the same way for texts.
+        if (phoneNumber != null) {
+            val phoneLists = allLists.filter { it.channel == PatternListEntity.CHANNEL_PHONE }
+            val match = findListMatch(phoneNumber, prefixes, phoneLists)
+            if (match != null) {
+                val (list, pattern) = match
+                return if (list.type == PatternListEntity.TYPE_BLOCK) {
+                    SmsAction.Hide(BlockSource.PatternMatch(list.listId, pattern.name))
+                } else {
+                    SmsAction.Keep
+                }
             }
         }
 
-        // No pattern list match — same opt-in heuristic fallback as evaluateCall.
-        val historyTrackingEnabled =
-            try {
-                runBlocking { PreferencesManager.isCallHistoryTrackingEnabled(context) }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error reading call history tracking preference", e)
-                false
+        // SMS keyword lists: content-based, works even for alphanumeric
+        // senders ("FreeMobile", short codes...) that have no phone number.
+        if (!messageText.isNullOrBlank()) {
+            val smsLists = allLists.filter { it.channel == PatternListEntity.CHANNEL_SMS }
+            val keywordMatch = findKeywordMatch(messageText, smsLists)
+            if (keywordMatch != null) {
+                val (list, pattern) = keywordMatch
+                return if (list.type == PatternListEntity.TYPE_BLOCK) {
+                    SmsAction.Hide(BlockSource.PatternMatch(list.listId, pattern.name))
+                } else {
+                    SmsAction.Keep
+                }
             }
-        if (historyTrackingEnabled) {
-            val score = SpamDetectorProvider.get().scoreSms(phoneNumber, prefixes, context)
-            if (score.score >= HeuristicSpamDetector.BLOCK_THRESHOLD) {
-                return SmsAction.Hide(BlockSource.Heuristic(score.score, score.reason))
+        }
+
+        // No list match — same opt-in heuristic fallback as evaluateCall.
+        // Requires a phone number since scoring keys on call/SMS frequency
+        // history per number.
+        if (phoneNumber != null) {
+            val historyTrackingEnabled =
+                try {
+                    runBlocking { PreferencesManager.isCallHistoryTrackingEnabled(context) }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error reading call history tracking preference", e)
+                    false
+                }
+            if (historyTrackingEnabled) {
+                val score = SpamDetectorProvider.get().scoreSms(phoneNumber, prefixes, context)
+                if (score.score >= HeuristicSpamDetector.BLOCK_THRESHOLD) {
+                    return SmsAction.Hide(BlockSource.Heuristic(score.score, score.reason))
+                }
             }
         }
 
