@@ -84,8 +84,10 @@ fun PatternDetailSheet(
         return
     }
 
-    val isPhone = pattern.pattern.firstOrNull()?.isDigit() == true
-    val isPrefix = pattern.pattern.contains('#')
+    // Driven by the parent list's channel rather than sniffing the pattern
+    // text — a keyword like "100% gratuit" starts with a digit too.
+    val isPhone = parentList.channel != PatternListEntity.CHANNEL_SMS
+    val isPrefix = isPhone && pattern.pattern.contains('#')
     val (rangeFirst, rangeLast) = PatternService.getNumberRange(pattern.pattern)
     val coveredNumbers = PatternService.calculateCoveredNumbers(pattern.pattern)
     val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)

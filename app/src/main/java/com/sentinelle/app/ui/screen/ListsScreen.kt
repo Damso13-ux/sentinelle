@@ -110,8 +110,8 @@ fun ListsScreen() {
             ListSection(
                 title = "Listes personnelle",
                 description =
-                    "Ajoutez vos propres numéros ou préfixes pour qu'ils soient autorisés, " +
-                        "identifiés ou bloqués.",
+                    "Ajoutez vos propres numéros, préfixes ou mots-clés SMS pour qu'ils soient " +
+                        "autorisés, identifiés ou bloqués.",
                 lists = sortedUserLists,
                 emptyMessage = "Chargement des listes personnelles...",
                 numberFormat = numberFormat,

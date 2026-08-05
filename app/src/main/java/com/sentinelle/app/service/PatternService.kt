@@ -118,6 +118,75 @@ object PatternService {
         }
     }
 
+    fun validateKeyword(input: String): PatternValidation {
+        val trimmed = input.trim()
+
+        if (trimmed.isEmpty()) {
+            return PatternValidation.Invalid("Le mot-clé ne peut pas être vide.")
+        }
+        if (trimmed.length < 2) {
+            return PatternValidation.Invalid("Le mot-clé est trop court (minimum 2 caractères).")
+        }
+        if (trimmed.length > 100) {
+            return PatternValidation.Invalid("Le mot-clé est trop long (maximum 100 caractères).")
+        }
+
+        return PatternValidation.Valid
+    }
+
+    // Scoped to SMS-channel lists only — comparing a keyword against a
+    // phone-number pattern's raw text would be a meaningless "duplicate".
+    fun detectDuplicateKeyword(
+        keyword: String,
+        context: Context,
+    ): String? {
+        val db = AppDatabase.getInstance(context)
+        val trimmed = keyword.trim()
+        val smsListIds =
+            (db.patternListDao().getBySource(PatternListEntity.SOURCE_USER) + db.patternListDao().getBySource(PatternListEntity.SOURCE_API))
+                .filter { it.channel == PatternListEntity.CHANNEL_SMS }
+                .map { it.id }
+                .toSet()
+        val existing =
+            db
+                .patternListItemDao()
+                .getAllPatterns()
+                .filter { it.listId in smsListIds }
+                .find { it.pattern.equals(trimmed, ignoreCase = true) } ?: return null
+        val source = db.patternListDao().getById(existing.listId)?.source
+        return if (source == PatternListEntity.SOURCE_API) {
+            "Ce mot-clé est déjà présent dans une liste publique."
+        } else {
+            "Ce mot-clé existe déjà dans vos éléments personnalisés."
+        }
+    }
+
+    fun addUserKeyword(
+        keyword: String,
+        name: String,
+        listId: Long,
+        context: Context,
+    ): Long {
+        val db = AppDatabase.getInstance(context)
+        val itemDao = db.patternListItemDao()
+        val listDao = db.patternListDao()
+        val entity =
+            PatternListItemEntity(
+                listId = listId,
+                name = name,
+                pattern = keyword.trim(),
+                dateAdded = System.currentTimeMillis(),
+            )
+        var newId = 0L
+        db.runInTransaction {
+            newId = itemDao.insert(entity)
+            listDao.addCount(listId, 1)
+        }
+        com.sentinelle.app.util.PatternManager
+            .clearCache()
+        return newId
+    }
+
     fun addUserPattern(
         pattern: String,
         name: String,

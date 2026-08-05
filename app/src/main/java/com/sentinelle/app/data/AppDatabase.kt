@@ -41,6 +41,22 @@ abstract class AppDatabase : RoomDatabase() {
         val dao = patternListDao()
         dao.insertIfAbsent(userList(PatternListEntity.USER_ALLOW_LIST_ID, "user allow", PatternListEntity.TYPE_ALLOW))
         dao.insertIfAbsent(userList(PatternListEntity.USER_BLOCK_LIST_ID, "user block", PatternListEntity.TYPE_BLOCK))
+        dao.insertIfAbsent(
+            userList(
+                PatternListEntity.USER_ALLOW_SMS_LIST_ID,
+                "user allow sms",
+                PatternListEntity.TYPE_ALLOW,
+                PatternListEntity.CHANNEL_SMS,
+            ),
+        )
+        dao.insertIfAbsent(
+            userList(
+                PatternListEntity.USER_BLOCK_SMS_LIST_ID,
+                "user block sms",
+                PatternListEntity.TYPE_BLOCK,
+                PatternListEntity.CHANNEL_SMS,
+            ),
+        )
     }
 
     companion object {
@@ -62,6 +78,7 @@ abstract class AppDatabase : RoomDatabase() {
             id: Long,
             name: String,
             type: String,
+            channel: String = PatternListEntity.CHANNEL_PHONE,
         ): PatternListEntity =
             PatternListEntity(
                 id = id,
@@ -72,7 +89,7 @@ abstract class AppDatabase : RoomDatabase() {
                 priority = 0,
                 version = "",
                 count = 0L,
-                channel = PatternListEntity.CHANNEL_PHONE,
+                channel = channel,
                 type = type,
                 source = PatternListEntity.SOURCE_USER,
                 downloadUrl = "",

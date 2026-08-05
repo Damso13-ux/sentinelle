@@ -23,6 +23,8 @@ data class PatternListEntity(
         when (name) {
             "user allow" -> "Autorisé et identifié"
             "user block" -> "Bloqué"
+            "user allow sms" -> "Mots-clés autorisés (SMS)"
+            "user block sms" -> "Mots-clés bloqués (SMS)"
             else -> name
         }
 
@@ -38,5 +40,7 @@ data class PatternListEntity(
 
         const val USER_ALLOW_LIST_ID = -1L
         const val USER_BLOCK_LIST_ID = -2L
+        const val USER_ALLOW_SMS_LIST_ID = -3L
+        const val USER_BLOCK_SMS_LIST_ID = -4L
     }
 }

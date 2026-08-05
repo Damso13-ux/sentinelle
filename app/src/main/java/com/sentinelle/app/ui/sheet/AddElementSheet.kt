@@ -35,6 +35,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.sentinelle.app.data.PatternListEntity
 import com.sentinelle.app.service.PatternService
 import com.sentinelle.app.service.PatternValidation
 import java.text.NumberFormat
@@ -44,9 +45,11 @@ import java.util.Locale
 @Composable
 fun AddElementSheet(
     listId: Long,
+    channel: String,
     onDismiss: () -> Unit,
     onPatternAdded: () -> Unit,
 ) {
+    val isKeyword = channel == PatternListEntity.CHANNEL_SMS
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val context = LocalContext.current
     val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
@@ -54,14 +57,20 @@ fun AddElementSheet(
     var nameInput by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val hasWildcards = patternInput.contains("#")
-    val formatValidation = PatternService.validatePattern(patternInput)
+    val hasWildcards = !isKeyword && patternInput.contains("#")
+    val formatValidation =
+        if (isKeyword) PatternService.validateKeyword(patternInput) else PatternService.validatePattern(patternInput)
     val showRange = hasWildcards && formatValidation is PatternValidation.Valid
 
     fun validateAndCheck() {
-        val validation = PatternService.validatePattern(patternInput)
+        val validation = if (isKeyword) PatternService.validateKeyword(patternInput) else PatternService.validatePattern(patternInput)
         if (validation is PatternValidation.Invalid) {
             errorMessage = validation.message
+            return
+        }
+
+        if (isKeyword) {
+            errorMessage = PatternService.detectDuplicateKeyword(patternInput, context)
             return
         }
 
@@ -113,7 +122,7 @@ fun AddElementSheet(
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Numéro ou préfixe",
+                text = if (isKeyword) "Mot-clé" else "Numéro ou préfixe",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 modifier =
@@ -128,13 +137,27 @@ fun AddElementSheet(
                     patternInput = it
                     errorMessage = null
                 },
-                placeholder = { Text("+33612345678 ou +33612345####") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
+                placeholder = { Text(if (isKeyword) "gagné, cliquez ici, urgent..." else "+33612345678 ou +33612345####") },
+                keyboardOptions =
+                    if (isKeyword) {
+                        KeyboardOptions(capitalization = KeyboardCapitalization.None)
+                    } else {
+                        KeyboardOptions(keyboardType = KeyboardType.Uri)
+                    },
                 singleLine = true,
                 isError = errorMessage != null,
                 supportingText =
                     if (errorMessage != null) {
                         { Text(text = errorMessage!!, color = MaterialTheme.colorScheme.error) }
+                    } else if (isKeyword) {
+                        {
+                            Text(
+                                text =
+                                    "Le SMS sera masqué s'il contient ce mot ou cette phrase " +
+                                        "(insensible à la casse). Exemple : « gagné ».",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
                     } else {
                         {
                             Text(
@@ -178,7 +201,7 @@ fun AddElementSheet(
             OutlinedTextField(
                 value = nameInput,
                 onValueChange = { nameInput = it },
-                placeholder = { Text("Spam Marketing") },
+                placeholder = { Text(if (isKeyword) "Spam loterie" else "Spam Marketing") },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 singleLine = true,
                 supportingText = {
@@ -196,12 +219,21 @@ fun AddElementSheet(
                 onClick = {
                     validateAndCheck()
                     if (errorMessage == null) {
-                        PatternService.addUserPattern(
-                            patternInput,
-                            nameInput,
-                            listId,
-                            context,
-                        )
+                        if (isKeyword) {
+                            PatternService.addUserKeyword(
+                                patternInput,
+                                nameInput,
+                                listId,
+                                context,
+                            )
+                        } else {
+                            PatternService.addUserPattern(
+                                patternInput,
+                                nameInput,
+                                listId,
+                                context,
+                            )
+                        }
                         onPatternAdded()
                         onDismiss()
                     }

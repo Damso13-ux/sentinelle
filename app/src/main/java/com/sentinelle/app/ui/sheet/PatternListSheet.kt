@@ -172,9 +172,18 @@ fun PatternListSheet(
                 }
             } else {
                 item(key = "user_header") {
+                    val isSms = list.channel == PatternListEntity.CHANNEL_SMS
                     val descriptionText =
-                        when (list.type) {
-                            PatternListEntity.TYPE_ALLOW -> {
+                        when {
+                            isSms && list.type == PatternListEntity.TYPE_ALLOW -> {
+                                "Ajoutez des mots-clés à toujours autoriser dans les SMS, même s'ils correspondent à un mot-clé bloqué ailleurs."
+                            }
+
+                            isSms -> {
+                                "Ajoutez des mots-clés à bloquer dans les SMS. Un SMS contenant l'un de ces mots verra sa notification masquée."
+                            }
+
+                            list.type == PatternListEntity.TYPE_ALLOW -> {
                                 "Ajoutez des préfixes ou des numéros à autoriser. Ces numéros ne seront jamais bloqués et seront identifiés par une notification."
                             }
 
@@ -266,6 +275,7 @@ fun PatternListSheet(
                     PatternRow(
                         pattern = pattern,
                         type = list.type,
+                        channel = list.channel,
                         numberFormat = numberFormat,
                     )
                 }
@@ -312,6 +322,7 @@ fun PatternListSheet(
     if (showAddSheet) {
         AddElementSheet(
             listId = listId,
+            channel = list.channel,
             onDismiss = { showAddSheet = false },
             onPatternAdded = { refreshKey++ },
         )
@@ -329,11 +340,15 @@ fun PatternListSheet(
 private fun PatternRow(
     pattern: PatternListItemEntity,
     type: String,
+    channel: String,
     numberFormat: NumberFormat,
     modifier: Modifier = Modifier,
 ) {
-    val isPhone = pattern.pattern.firstOrNull()?.isDigit() == true
-    val isPrefix = pattern.pattern.contains('#')
+    // Driven by the list's channel rather than sniffing the pattern text —
+    // a keyword like "100% gratuit" starts with a digit too, so guessing
+    // from content alone would misformat it as a phone number.
+    val isPhone = channel != PatternListEntity.CHANNEL_SMS
+    val isPrefix = isPhone && pattern.pattern.contains('#')
     val coveredNumbers = if (isPhone && isPrefix) PatternService.calculateCoveredNumbers(pattern.pattern) else null
     val countLabel =
         when {
