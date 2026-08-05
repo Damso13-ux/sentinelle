@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinelle — Politique de confidentialité</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #0E1420;
+    --surface: #152030;
+    --text: #F1EFE8;
+    --muted: #8B96A3;
+    --accent: #5DCAA5;
+    --primary: #1D9E75;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+  header { margin-bottom: 32px; }
+  h1 {
+    font-size: 1.8rem;
+    margin: 0 0 8px;
+  }
+  .subtitle { color: var(--muted); font-size: 0.95rem; }
+  h2 {
+    font-size: 1.2rem;
+    margin-top: 40px;
+    color: var(--accent);
+    border-bottom: 1px solid var(--surface);
+    padding-bottom: 8px;
+  }
+  p, li { color: var(--text); }
+  ul { padding-left: 1.2em; }
+  .card {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(93, 202, 165, 0.15);
+    color: var(--accent);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 4px 6px 4px 0;
+  }
+  code {
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+  a { color: var(--accent); }
+  footer {
+    margin-top: 48px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--surface);
+    padding-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🛡️ Sentinelle — Politique de confidentialité</h1>
+    <p class="subtitle">Dernière mise à jour : 5 août 2026</p>
+  </header>
+
+  <div class="card">
+    <span class="badge">Aucun compte</span>
+    <span class="badge">Aucune publicité</span>
+    <span class="badge">Aucun tracker</span>
+    <span class="badge">Aucun accès à vos contacts</span>
+    <span class="badge">Aucune vente de données</span>
+  </div>
+
+  <p>
+    Sentinelle est une application Android de blocage d'appels et de SMS indésirables.
+    Elle est développée par un particulier et dérivée du projet open source
+    <a href="https://codeberg.org/cbouvat/saracroche-android" target="_blank" rel="noopener">Saracroche</a>
+    (licence GPLv3). Cette page décrit précisément quelles données Sentinelle traite,
+    lesquelles restent sur votre appareil, et lesquelles quittent votre appareil — et pourquoi.
+  </p>
+
+  <h2>Ce qui reste toujours sur votre appareil</h2>
+  <p>Sentinelle stocke localement, dans une base de données privée à l'application (jamais accessible aux autres apps ni synchronisée dans un cloud) :</p>
+  <ul>
+    <li>Vos listes personnelles de numéros/préfixes/mots-clés autorisés ou bloqués</li>
+    <li>L'historique des appels et SMS bloqués (numéro, horodatage, raison du blocage)</li>
+    <li>Les labels que vous ajoutez à des numéros (« démarchage », « arnaque »...)</li>
+    <li>Si vous l'activez explicitement : un court historique des appels/SMS filtrés, utilisé uniquement pour la détection heuristique locale (fréquence, horaires). Ce réglage est désactivé par défaut et purgé automatiquement après 30 jours.</li>
+  </ul>
+  <p><strong>Rien de tout cela n'est jamais envoyé hors de votre appareil.</strong> Sentinelle n'a pas de compte utilisateur, pas de serveur qui reçoit vos données personnelles, et n'accède jamais à votre liste de contacts.</p>
+
+  <h2>Ce qui quitte votre appareil, et pourquoi</h2>
+  <p>Deux fonctionnalités font des requêtes réseau, toutes deux vers l'infrastructure du projet d'origine Saracroche (<code>app.saracroche.org</code>), que le développeur de Sentinelle ne contrôle pas :</p>
+
+  <p><strong>1. Mise à jour des listes de blocage (automatique, en arrière-plan)</strong></p>
+  <p>
+    Pour connaître les numéros à bloquer, l'application télécharge périodiquement des listes
+    publiques de numéros signalés comme indésirables. Cette requête envoie un identifiant
+    d'appareil généré aléatoirement par l'application (pas un identifiant matériel type IMEI)
+    et votre indicatif pays. Aucune information personnelle identifiable n'est transmise.
+  </p>
+
+  <p><strong>2. Signalement d'un numéro (uniquement si vous utilisez l'écran « Signaler »)</strong></p>
+  <p>
+    Si vous signalez volontairement un numéro comme indésirable ou légitime, le numéro signalé,
+    accompagné de votre indicatif et de l'identifiant d'appareil aléatoire, est envoyé au serveur
+    afin d'améliorer les listes publiques. Cette action nécessite que vous saisissiez et envoyiez
+    le numéro vous-même — rien n'est signalé automatiquement.
+  </p>
+
+  <h2>Permissions Android demandées, et pourquoi</h2>
+  <ul>
+    <li><strong>Filtrage/identification des appels</strong> (rôle Call Screening) — permet à Sentinelle d'examiner un appel entrant et de le bloquer avant qu'il ne sonne, si le numéro correspond à une liste ou est jugé suspect. C'est le cœur de la fonctionnalité de blocage d'appels.</li>
+    <li><strong>Accès aux notifications</strong> — permet à Sentinelle de détecter et masquer les notifications de SMS indésirables provenant de votre application de messagerie par défaut. Sentinelle ne lit et ne stocke que le strict nécessaire (numéro/texte du SMS analysé localement) pour décider s'il doit être masqué ; le contenu n'est jamais transmis hors de l'appareil.</li>
+    <li><strong>Affichage par-dessus les autres applications</strong> — utilisé uniquement si vous activez la « bulle d'identification d'appel », qui affiche une petite info à l'écran pendant un appel entrant non bloqué.</li>
+    <li><strong>Notifications</strong> — pour vous informer qu'un appel ou SMS a été bloqué (désactivable dans les réglages).</li>
+  </ul>
+
+  <h2>Ce que Sentinelle ne fait jamais</h2>
+  <ul>
+    <li>Pas de vente ni de partage de données à des fins publicitaires ou marketing</li>
+    <li>Pas de publicité intégrée</li>
+    <li>Pas de suivi analytique tiers (aucun SDK de tracking, aucune télémétrie)</li>
+    <li>Pas d'accès à votre liste de contacts</li>
+    <li>Pas d'accès au contenu de vos appels ou au journal d'appels du système</li>
+  </ul>
+
+  <h2>Suppression de vos données</h2>
+  <p>
+    Toutes les données de Sentinelle sont locales à votre appareil. Vous pouvez les supprimer
+    à tout moment via Réglages → Réinitialiser l'application, ou simplement en désinstallant
+    l'application.
+  </p>
+
+  <h2>Licence et code source</h2>
+  <p>
+    Sentinelle est un logiciel libre sous licence GPLv3, dérivé de Saracroche. Le code source
+    est disponible pour inspection sur
+    <a href="https://github.com/Damso13-ux/sentinelle" target="_blank" rel="noopener">GitHub</a>.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Pour toute question concernant cette politique de confidentialité :
+    <a href="mailto:damdam13122@gmail.com">damdam13122@gmail.com</a>
+  </p>
+
+  <h2>Modifications</h2>
+  <p>
+    Cette politique peut être mise à jour si les fonctionnalités de l'application évoluent.
+    La date de dernière mise à jour figure en haut de cette page.
+  </p>
+
+  <footer>
+    Sentinelle — dérivé de <a href="https://codeberg.org/cbouvat/saracroche-android" target="_blank" rel="noopener">Saracroche</a> (GPLv3)
+  </footer>
+</div>
+</body>
+</html>
