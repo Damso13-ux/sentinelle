@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.Insights
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -49,6 +50,8 @@ fun CallSettingsSheet(
     onBlockedCallNotificationChange: (Boolean) -> Unit,
     heuristicDetectionEnabled: Boolean,
     onHeuristicDetectionEnabledChange: (Boolean) -> Unit,
+    heuristicShadowModeEnabled: Boolean,
+    onHeuristicShadowModeEnabledChange: (Boolean) -> Unit,
     callerIdBubbleEnabled: Boolean,
     onCallerIdBubbleEnabledChange: (Boolean) -> Unit,
     onDismiss: () -> Unit,
@@ -264,6 +267,43 @@ fun CallSettingsSheet(
                     checked = heuristicDetectionEnabled,
                     onCheckedChange = onHeuristicDetectionEnabledChange,
                     enabled = callFilteringEnabled,
+                )
+            }
+
+            Row(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 8.dp)
+                        .alpha(if (callFilteringEnabled && heuristicDetectionEnabled) 1f else 0.38f),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Visibility,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Mode silencieux (observer sans bloquer)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text =
+                            "Enregistre ce que l'heuristique aurait bloqué, sans rien bloquer " +
+                                "réellement — pratique pour vérifier sa fiabilité avant de l'activer pour de bon.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = heuristicShadowModeEnabled,
+                    onCheckedChange = onHeuristicShadowModeEnabledChange,
+                    enabled = callFilteringEnabled && heuristicDetectionEnabled,
                 )
             }
 

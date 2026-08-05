@@ -16,8 +16,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         CallHistoryEntity::class,
         NumberLabelEntity::class,
         SmsHistoryEntity::class,
+        HeuristicShadowEventEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -36,6 +37,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun numberLabelDao(): NumberLabelDao
 
     abstract fun smsHistoryDao(): SmsHistoryDao
+
+    abstract fun heuristicShadowEventDao(): HeuristicShadowEventDao
 
     fun seedUserLists() {
         val dao = patternListDao()
@@ -240,13 +243,34 @@ abstract class AppDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_5_6 =
+            object : Migration(5, 6) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS heuristic_shadow_events (
+                            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            channel TEXT NOT NULL,
+                            phoneNumber INTEGER NOT NULL,
+                            timestamp INTEGER NOT NULL,
+                            score REAL NOT NULL,
+                            reason TEXT
+                        )
+                        """,
+                    )
+                    db.execSQL(
+                        "CREATE INDEX IF NOT EXISTS index_heuristic_shadow_events_timestamp ON heuristic_shadow_events(timestamp)",
+                    )
+                }
+            }
+
         private fun buildDatabase(context: Context): AppDatabase =
             Room
                 .databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "sentinelle.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .fallbackToDestructiveMigration(false)
                 .allowMainThreadQueries()
                 .build()

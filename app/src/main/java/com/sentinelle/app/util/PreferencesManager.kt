@@ -52,6 +52,12 @@ object PreferencesManager {
     // requested only once the user turns this on.
     private val CALLER_ID_BUBBLE_ENABLED_KEY = booleanPreferencesKey("caller_id_bubble_enabled")
 
+    // Off by default. Only meaningful when CALL_HISTORY_TRACKING_ENABLED_KEY
+    // is also on: instead of actually blocking a heuristic match, it's logged
+    // to heuristic_shadow_events for the user to review before trusting the
+    // detector to block for real.
+    private val HEURISTIC_SHADOW_MODE_ENABLED_KEY = booleanPreferencesKey("heuristic_shadow_mode_enabled")
+
     private val DEFAULT_COUNTRY_PREFIXES = setOf("33")
     private const val DEFAULT_COUNTRY_CODES = "FR"
 
@@ -340,6 +346,31 @@ object PreferencesManager {
     ) {
         context.dataStore.edit { preferences ->
             preferences[CALLER_ID_BUBBLE_ENABLED_KEY] = enabled
+        }
+    }
+
+    /**
+     * "Shadow mode" for the heuristic detector: logs what would have been
+     * blocked instead of actually blocking it, so accuracy can be reviewed
+     * before trusting real blocking. Off by default.
+     */
+    fun getHeuristicShadowModeEnabledFlow(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { preferences ->
+            preferences[HEURISTIC_SHADOW_MODE_ENABLED_KEY] ?: false
+        }
+
+    suspend fun isHeuristicShadowModeEnabled(context: Context): Boolean =
+        context.dataStore.data
+            .map { preferences ->
+                preferences[HEURISTIC_SHADOW_MODE_ENABLED_KEY] ?: false
+            }.first()
+
+    suspend fun setHeuristicShadowModeEnabled(
+        context: Context,
+        enabled: Boolean,
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences[HEURISTIC_SHADOW_MODE_ENABLED_KEY] = enabled
         }
     }
 }

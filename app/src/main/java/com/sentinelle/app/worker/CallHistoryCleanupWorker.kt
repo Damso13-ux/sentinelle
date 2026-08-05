@@ -27,6 +27,7 @@ class CallHistoryCleanupWorker(
             val db = AppDatabase.getInstance(applicationContext)
             db.callHistoryDao().deleteOlderThan(cutoff)
             db.smsHistoryDao().deleteOlderThan(cutoff)
+            db.heuristicShadowEventDao().deleteOlderThan(cutoff)
             Log.d(TAG, "Call/SMS history cleanup successful")
             Result.success()
         } catch (e: Exception) {

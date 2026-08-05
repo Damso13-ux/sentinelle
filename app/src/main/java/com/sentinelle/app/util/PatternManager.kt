@@ -3,10 +3,12 @@ package com.sentinelle.app.util
 import android.content.Context
 import android.util.Log
 import com.sentinelle.app.data.AppDatabase
+import com.sentinelle.app.data.HeuristicShadowEventEntity
 import com.sentinelle.app.data.PatternListEntity
 import com.sentinelle.app.service.ListPriorityService
 import com.sentinelle.app.spam.HeuristicSpamDetector
 import com.sentinelle.app.spam.SpamDetectorProvider
+import com.sentinelle.app.spam.SpamScore
 import kotlinx.coroutines.runBlocking
 
 data class BlockedPattern(
@@ -164,6 +166,10 @@ object PatternManager {
         if (historyTrackingEnabled) {
             val score = SpamDetectorProvider.get().scoreCall(phoneNumber, prefixes, context)
             if (score.score >= HeuristicSpamDetector.BLOCK_THRESHOLD) {
+                if (isShadowModeEnabled(context)) {
+                    logShadowEvent(context, PatternListEntity.CHANNEL_PHONE, phoneNumber, score)
+                    return CallAction.None
+                }
                 return CallAction.Block(BlockSource.Heuristic(score.score, score.reason))
             }
         }
@@ -223,11 +229,47 @@ object PatternManager {
             if (historyTrackingEnabled) {
                 val score = SpamDetectorProvider.get().scoreSms(phoneNumber, prefixes, context)
                 if (score.score >= HeuristicSpamDetector.BLOCK_THRESHOLD) {
+                    if (isShadowModeEnabled(context)) {
+                        logShadowEvent(context, PatternListEntity.CHANNEL_SMS, phoneNumber, score)
+                        return SmsAction.Keep
+                    }
                     return SmsAction.Hide(BlockSource.Heuristic(score.score, score.reason))
                 }
             }
         }
 
         return SmsAction.Keep
+    }
+
+    private fun isShadowModeEnabled(context: Context): Boolean =
+        try {
+            runBlocking { PreferencesManager.isHeuristicShadowModeEnabled(context) }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error reading heuristic shadow mode preference", e)
+            false
+        }
+
+    private fun logShadowEvent(
+        context: Context,
+        channel: String,
+        phoneNumber: Long,
+        score: SpamScore,
+    ) {
+        try {
+            AppDatabase
+                .getInstance(context)
+                .heuristicShadowEventDao()
+                .insert(
+                    HeuristicShadowEventEntity(
+                        channel = channel,
+                        phoneNumber = phoneNumber,
+                        timestamp = System.currentTimeMillis(),
+                        score = score.score,
+                        reason = score.reason,
+                    ),
+                )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error logging heuristic shadow event", e)
+        }
     }
 }

@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Message
 import androidx.compose.material.icons.automirrored.rounded.PhoneMissed
 import androidx.compose.material.icons.rounded.AddModerator
+import androidx.compose.material.icons.rounded.BatteryAlert
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Error
 import androidx.compose.material.icons.rounded.Info
@@ -138,10 +139,14 @@ fun HomeScreen(
     val isHeuristicDetectionEnabled by PreferencesManager
         .getCallHistoryTrackingEnabledFlow(context)
         .collectAsState(initial = false)
+    val isHeuristicShadowModeEnabled by PreferencesManager
+        .getHeuristicShadowModeEnabledFlow(context)
+        .collectAsState(initial = false)
     val isCallerIdBubbleEnabled by PreferencesManager
         .getCallerIdBubbleEnabledFlow(context)
         .collectAsState(initial = false)
     var isNotificationListenerEnabled by remember { mutableStateOf(false) }
+    var isIgnoringBatteryOptimizations by remember { mutableStateOf(true) }
     val lastListUpdate by PreferencesManager
         .getLastListUpdateFlow(context)
         .collectAsState(initial = 0L)
@@ -203,6 +208,7 @@ fun HomeScreen(
             (context.getSystemService(ActivityManager::class.java))
                 .isBackgroundRestricted
         isNotificationListenerEnabled = PermissionUtils.isNotificationListenerEnabled(context)
+        isIgnoringBatteryOptimizations = PermissionUtils.isIgnoringBatteryOptimizations(context)
     }
 
     LaunchedEffect(Unit) {
@@ -304,6 +310,12 @@ fun HomeScreen(
                         onSmsClick = { showSmsSettingsSheet = true },
                         isNotificationListenerEnabled = isNotificationListenerEnabled,
                     )
+
+                    if (!isIgnoringBatteryOptimizations) {
+                        BatteryOptimizationCard(
+                            onFixClick = { PermissionUtils.openBatteryOptimizationSettings(context) },
+                        )
+                    }
                 }
             }
         }
@@ -433,6 +445,12 @@ fun HomeScreen(
             onHeuristicDetectionEnabledChange = { newValue ->
                 coroutineScope.launch {
                     PreferencesManager.setCallHistoryTrackingEnabled(context, newValue)
+                }
+            },
+            heuristicShadowModeEnabled = isHeuristicShadowModeEnabled,
+            onHeuristicShadowModeEnabledChange = { newValue ->
+                coroutineScope.launch {
+                    PreferencesManager.setHeuristicShadowModeEnabled(context, newValue)
                 }
             },
             callerIdBubbleEnabled = isCallerIdBubbleEnabled,
@@ -790,6 +808,47 @@ fun ProtectionCard(
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun BatteryOptimizationCard(onFixClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.BatteryAlert,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.tertiary,
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Fiabilité en arrière-plan",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text =
+                        "Sur certains appareils (Xiaomi/MIUI notamment), le système peut arrêter " +
+                            "Sentinelle en arrière-plan et l'empêcher de filtrer vos appels et SMS. " +
+                            "Désactivez l'optimisation de la batterie pour plus de fiabilité.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(onClick = onFixClick) {
+                    Text("Corriger", fontWeight = FontWeight.Bold)
+                }
             }
         }
     }
