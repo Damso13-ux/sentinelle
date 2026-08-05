@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
@@ -33,6 +35,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +72,7 @@ import androidx.work.workDataOf
 import com.sentinelle.app.billing.BillingManager
 import com.sentinelle.app.service.ListService
 import com.sentinelle.app.ui.sheet.DebugSheet
+import com.sentinelle.app.ui.theme.ThemeVariant
 import com.sentinelle.app.util.PermissionUtils
 import com.sentinelle.app.util.PreferencesManager
 import com.sentinelle.app.widget.SentinelleWidgetProvider
@@ -238,6 +243,8 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
     var bisouTapCount by remember { mutableIntStateOf(0) }
 
     val proUnlocked by PreferencesManager.getProUnlockedFlow(context).collectAsState(initial = false)
+    val selectedThemeVariant by
+        PreferencesManager.getStoredThemeVariantFlow(context).collectAsState(initial = ThemeVariant.GARDE)
     val billingManager = remember { BillingManager(context) }
     DisposableEffect(Unit) {
         // Re-checks Play's purchase records on every visit to this screen,
@@ -348,6 +355,53 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                         ),
                     ),
             )
+
+            // Apparence Section — Corail/Violet are Pro, Garde always free.
+            Column {
+                Text(
+                    text = "Apparence",
+                    style =
+                        MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                        ),
+                    modifier = Modifier.padding(16.dp),
+                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    ThemeVariant.entries.forEach { variant ->
+                        val locked = variant != ThemeVariant.GARDE && !proUnlocked
+                        FilterChip(
+                            selected = selectedThemeVariant == variant,
+                            onClick = {
+                                if (locked) {
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            "Thème réservé à Sentinelle Pro.",
+                                            Toast.LENGTH_SHORT,
+                                        ).show()
+                                } else {
+                                    coroutineScope.launch { PreferencesManager.setThemeVariant(context, variant) }
+                                }
+                            },
+                            label = { Text(variant.displayName) },
+                            leadingIcon = if (locked) {
+                                { Icon(Icons.Rounded.Lock, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                            } else {
+                                null
+                            },
+                            colors =
+                                FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                    selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                ),
+                        )
+                    }
+                }
+            }
 
             // Links Section
             SettingsSection(

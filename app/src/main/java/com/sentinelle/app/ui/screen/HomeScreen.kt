@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.ActivityManager
 import android.os.Build
 import android.provider.Telephony
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -72,6 +73,7 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.data.PatternListEntity
+import com.sentinelle.app.spam.HeuristicSettings
 import com.sentinelle.app.ui.dialog.CallScreeningFailedDialog
 import com.sentinelle.app.ui.sheet.CallSettingsSheet
 import com.sentinelle.app.ui.sheet.InfoSheet
@@ -145,6 +147,12 @@ fun HomeScreen(
     val isCallerIdBubbleEnabled by PreferencesManager
         .getCallerIdBubbleEnabledFlow(context)
         .collectAsState(initial = false)
+    val isProUnlocked by PreferencesManager
+        .getProUnlockedFlow(context)
+        .collectAsState(initial = false)
+    val heuristicSettings by PreferencesManager
+        .getStoredHeuristicSettingsFlow(context)
+        .collectAsState(initial = HeuristicSettings())
     var isNotificationListenerEnabled by remember { mutableStateOf(false) }
     var isIgnoringBatteryOptimizations by remember { mutableStateOf(true) }
     val lastListUpdate by PreferencesManager
@@ -452,6 +460,21 @@ fun HomeScreen(
                 coroutineScope.launch {
                     PreferencesManager.setHeuristicShadowModeEnabled(context, newValue)
                 }
+            },
+            isProUnlocked = isProUnlocked,
+            heuristicSettings = heuristicSettings,
+            onHeuristicSettingsChange = { newSettings ->
+                coroutineScope.launch {
+                    PreferencesManager.setHeuristicSettings(context, newSettings)
+                }
+            },
+            onRequestProUpsell = {
+                Toast
+                    .makeText(
+                        context,
+                        "Débloque Sentinelle Pro depuis Réglages pour régler l'heuristique.",
+                        Toast.LENGTH_LONG,
+                    ).show()
             },
             callerIdBubbleEnabled = isCallerIdBubbleEnabled,
             onCallerIdBubbleEnabledChange = { newValue ->

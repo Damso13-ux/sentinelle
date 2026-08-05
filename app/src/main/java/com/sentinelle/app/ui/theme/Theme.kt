@@ -95,6 +95,10 @@ fun AppTheme(
     // Dynamic color is available on Android 12+, off by default to keep the
     // "Garde" brand palette consistent across devices.
     dynamicColor: Boolean = false,
+    // Pro-gated accent swap — see ThemeVariant. Only takes effect when
+    // dynamicColor is off, since dynamic color already overrides the accent
+    // from the device wallpaper.
+    themeVariant: ThemeVariant = ThemeVariant.GARDE,
     content: @Composable () -> Unit,
 ) {
     val colorScheme =
@@ -104,7 +108,7 @@ fun AppTheme(
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }
 
-            darkTheme -> darkScheme
+            darkTheme -> withAccent(darkScheme, themeVariant)
 
             else -> lightScheme
         }
@@ -114,4 +118,37 @@ fun AppTheme(
         typography = AppTypography,
         content = content,
     )
+}
+
+private fun withAccent(
+    base: androidx.compose.material3.ColorScheme,
+    variant: ThemeVariant,
+) = when (variant) {
+    ThemeVariant.GARDE -> base
+
+    ThemeVariant.CORAIL ->
+        base.copy(
+            primary = primaryDarkCorail,
+            onPrimary = onPrimaryDarkCorail,
+            primaryContainer = primaryContainerDarkCorail,
+            onPrimaryContainer = onPrimaryContainerDarkCorail,
+            tertiary = tertiaryDarkCorail,
+            onTertiary = onTertiaryDarkCorail,
+            tertiaryContainer = tertiaryContainerDarkCorail,
+            onTertiaryContainer = onTertiaryContainerDarkCorail,
+            inversePrimary = inversePrimaryDarkCorail,
+        )
+
+    ThemeVariant.VIOLET ->
+        base.copy(
+            primary = primaryDarkViolet,
+            onPrimary = onPrimaryDarkViolet,
+            primaryContainer = primaryContainerDarkViolet,
+            onPrimaryContainer = onPrimaryContainerDarkViolet,
+            tertiary = tertiaryDarkViolet,
+            onTertiary = onTertiaryDarkViolet,
+            tertiaryContainer = tertiaryContainerDarkViolet,
+            onTertiaryContainer = onTertiaryContainerDarkViolet,
+            inversePrimary = inversePrimaryDarkViolet,
+        )
 }

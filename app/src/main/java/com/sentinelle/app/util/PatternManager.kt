@@ -6,7 +6,6 @@ import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.data.HeuristicShadowEventEntity
 import com.sentinelle.app.data.PatternListEntity
 import com.sentinelle.app.service.ListPriorityService
-import com.sentinelle.app.spam.HeuristicSpamDetector
 import com.sentinelle.app.spam.SpamDetectorProvider
 import com.sentinelle.app.spam.SpamScore
 import kotlinx.coroutines.runBlocking
@@ -165,7 +164,9 @@ object PatternManager {
             }
         if (historyTrackingEnabled) {
             val score = SpamDetectorProvider.get().scoreCall(phoneNumber, prefixes, context)
-            if (score.score >= HeuristicSpamDetector.BLOCK_THRESHOLD) {
+            val blockThreshold =
+                runBlocking { PreferencesManager.getEffectiveHeuristicSettings(context) }.blockThreshold
+            if (score.score >= blockThreshold) {
                 if (isShadowModeEnabled(context)) {
                     logShadowEvent(context, PatternListEntity.CHANNEL_PHONE, phoneNumber, score)
                     return CallAction.None
@@ -228,7 +229,9 @@ object PatternManager {
                 }
             if (historyTrackingEnabled) {
                 val score = SpamDetectorProvider.get().scoreSms(phoneNumber, prefixes, context)
-                if (score.score >= HeuristicSpamDetector.BLOCK_THRESHOLD) {
+                val blockThreshold =
+                    runBlocking { PreferencesManager.getEffectiveHeuristicSettings(context) }.blockThreshold
+                if (score.score >= blockThreshold) {
                     if (isShadowModeEnabled(context)) {
                         logShadowEvent(context, PatternListEntity.CHANNEL_SMS, phoneNumber, score)
                         return SmsAction.Keep

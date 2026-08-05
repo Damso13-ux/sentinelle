@@ -7,12 +7,16 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.sentinelle.app.spam.HeuristicSettings
+import com.sentinelle.app.ui.theme.ThemeVariant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -67,6 +71,15 @@ object PreferencesManager {
     // only in debug builds (see BuildConfig.DEBUG check there), to test
     // Pro-gated UI before a real Play Console product exists.
     private val PRO_UNLOCKED_KEY = booleanPreferencesKey("pro_unlocked")
+
+    // Pro-gated heuristic tuning — see HeuristicSettings for defaults/ranges
+    // and getEffectiveHeuristicSettings for how Pro status is enforced.
+    private val HEURISTIC_HISTORY_WINDOW_DAYS_KEY = intPreferencesKey("heuristic_history_window_days")
+    private val HEURISTIC_BLOCK_THRESHOLD_KEY = doublePreferencesKey("heuristic_block_threshold")
+    private val HEURISTIC_SENSITIVITY_KEY = doublePreferencesKey("heuristic_sensitivity")
+
+    // Pro-gated theme variant — see ThemeVariant and getEffectiveThemeVariant.
+    private val THEME_VARIANT_KEY = stringPreferencesKey("theme_variant")
 
     private val DEFAULT_COUNTRY_PREFIXES = setOf("33")
     private const val DEFAULT_COUNTRY_CODES = "FR"
@@ -403,4 +416,67 @@ object PreferencesManager {
             preferences[PRO_UNLOCKED_KEY] = unlocked
         }
     }
+
+    // --- Heuristic tuning (Pro) ---------------------------------------
+
+    /**
+     * The raw, persisted values regardless of Pro status — used by the
+     * settings UI, which only renders when Pro is already confirmed
+     * unlocked. Everything that actually *applies* these values (the
+     * detector, PatternManager's threshold check) must go through
+     * [getEffectiveHeuristicSettings] instead, never this.
+     */
+    fun getStoredHeuristicSettingsFlow(context: Context): Flow<HeuristicSettings> =
+        context.dataStore.data.map { preferences ->
+            HeuristicSettings(
+                historyWindowDays = preferences[HEURISTIC_HISTORY_WINDOW_DAYS_KEY] ?: HeuristicSettings.DEFAULT_HISTORY_WINDOW_DAYS,
+                blockThreshold = preferences[HEURISTIC_BLOCK_THRESHOLD_KEY] ?: HeuristicSettings.DEFAULT_BLOCK_THRESHOLD,
+                sensitivity = preferences[HEURISTIC_SENSITIVITY_KEY] ?: HeuristicSettings.DEFAULT_SENSITIVITY,
+            )
+        }
+
+    suspend fun setHeuristicSettings(
+        context: Context,
+        settings: HeuristicSettings,
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences[HEURISTIC_HISTORY_WINDOW_DAYS_KEY] = settings.historyWindowDays
+            preferences[HEURISTIC_BLOCK_THRESHOLD_KEY] = settings.blockThreshold
+            preferences[HEURISTIC_SENSITIVITY_KEY] = settings.sensitivity
+        }
+    }
+
+    /**
+     * What the detector should actually use: the stored tuning if — and
+     * only if — Pro is currently unlocked, otherwise the hard defaults.
+     * Re-checked on every call rather than cached, so a refund takes effect
+     * immediately instead of leaving a stale custom tuning active.
+     */
+    suspend fun getEffectiveHeuristicSettings(context: Context): HeuristicSettings {
+        if (!isProUnlocked(context)) return HeuristicSettings()
+        return getStoredHeuristicSettingsFlow(context).first()
+    }
+
+    // --- Theme variant (Pro) --------------------------------------------
+
+    fun getStoredThemeVariantFlow(context: Context): Flow<ThemeVariant> =
+        context.dataStore.data.map { preferences ->
+            ThemeVariant.fromStorageKey(preferences[THEME_VARIANT_KEY])
+        }
+
+    suspend fun setThemeVariant(
+        context: Context,
+        variant: ThemeVariant,
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences[THEME_VARIANT_KEY] = variant.storageKey
+        }
+    }
+
+    /** Same idea as getEffectiveHeuristicSettings: Garde for everyone unless Pro is confirmed unlocked right now. */
+    fun getEffectiveThemeVariantFlow(context: Context): Flow<ThemeVariant> =
+        context.dataStore.data.map { preferences ->
+            val proUnlocked = preferences[PRO_UNLOCKED_KEY] ?: false
+            if (!proUnlocked) ThemeVariant.GARDE else ThemeVariant.fromStorageKey(preferences[THEME_VARIANT_KEY])
+        }
 }

@@ -43,6 +43,31 @@ val surfaceContainerDark = Color(0xFF152030)
 val surfaceContainerHighDark = Color(0xFF1C293B)
 val surfaceContainerHighestDark = Color(0xFF263349)
 
+// "Corail" accent variant (Pro) — same Garde neutrals, warm terracotta
+// accent instead of teal. Only the roles that swap out in Theme.kt are
+// defined here.
+val primaryDarkCorail = Color(0xFFD97B4F)
+val onPrimaryDarkCorail = Color(0xFFFFFFFF)
+val primaryContainerDarkCorail = Color(0xFF5C3420)
+val onPrimaryContainerDarkCorail = Color(0xFFF5D9C0)
+val tertiaryDarkCorail = Color(0xFFE89B72)
+val onTertiaryDarkCorail = Color(0xFF3A1D0E)
+val tertiaryContainerDarkCorail = Color(0xFFD97B4F)
+val onTertiaryContainerDarkCorail = Color(0xFFFFFFFF)
+val inversePrimaryDarkCorail = Color(0xFFD97B4F)
+
+// "Violet" accent variant (Pro) — same Garde neutrals, indigo-violet
+// accent instead of teal.
+val primaryDarkViolet = Color(0xFF6D5DD3)
+val onPrimaryDarkViolet = Color(0xFFFFFFFF)
+val primaryContainerDarkViolet = Color(0xFF3A2E70)
+val onPrimaryContainerDarkViolet = Color(0xFFD9D1F5)
+val tertiaryDarkViolet = Color(0xFF9B8AF0)
+val onTertiaryDarkViolet = Color(0xFF1E1640)
+val tertiaryContainerDarkViolet = Color(0xFF6D5DD3)
+val onTertiaryContainerDarkViolet = Color(0xFFFFFFFF)
+val inversePrimaryDarkViolet = Color(0xFF6D5DD3)
+
 // Light scheme (counterpart, kept for parity — not used by default)
 val primaryLight = Color(0xFF1D9E75)
 val onPrimaryLight = Color(0xFFFFFFFF)

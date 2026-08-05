@@ -1,6 +1,9 @@
 package com.sentinelle.app.ui.screen
 
 import android.telephony.PhoneNumberUtils
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +19,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.PhoneDisabled
 import androidx.compose.material.icons.rounded.Sms
@@ -39,6 +43,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +64,10 @@ import java.util.Locale
 import com.sentinelle.app.ui.viewmodel.dashboard.DashboardViewModelFactory
 import com.sentinelle.app.ui.viewmodel.dashboard.TimeRange
 import com.sentinelle.app.ui.viewmodel.dashboard.TopBlockedNumberDisplay
+import com.sentinelle.app.util.PreferencesManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -69,10 +78,27 @@ fun DashboardScreen(
             factory = DashboardViewModelFactory(LocalContext.current),
         ),
 ) {
+    val context = LocalContext.current
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val uiState by viewModel.uiState.collectAsState()
     var showClearDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val proUnlocked by PreferencesManager.getProUnlockedFlow(context).collectAsState(initial = false)
+
+    // Storage Access Framework — no FileProvider needed, the user picks
+    // the save location and Sentinelle never needs broader file access.
+    val exportLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            coroutineScope.launch {
+                val csv = viewModel.buildCsvExport()
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray()) }
+                }
+                Toast.makeText(context, "Export terminé.", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -82,6 +108,22 @@ fun DashboardScreen(
                 scrollBehavior = scrollBehavior,
                 windowInsets = WindowInsets.statusBars,
                 actions = {
+                    IconButton(
+                        onClick = {
+                            if (proUnlocked) {
+                                exportLauncher.launch("sentinelle-export.csv")
+                            } else {
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "Export réservé à Sentinelle Pro.",
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                            }
+                        },
+                    ) {
+                        Icon(Icons.Rounded.FileDownload, contentDescription = "Exporter en CSV")
+                    }
                     IconButton(onClick = { showClearDialog = true }) {
                         Icon(Icons.Rounded.DeleteSweep, contentDescription = "Effacer l'historique")
                     }

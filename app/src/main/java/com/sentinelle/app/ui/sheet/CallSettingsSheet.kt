@@ -1,5 +1,6 @@
 package com.sentinelle.app.ui.sheet
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,15 +17,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Badge
 import androidx.compose.material.icons.rounded.HowToReg
 import androidx.compose.material.icons.rounded.Insights
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -35,6 +39,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.sentinelle.app.spam.HeuristicSettings
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +57,10 @@ fun CallSettingsSheet(
     onHeuristicDetectionEnabledChange: (Boolean) -> Unit,
     heuristicShadowModeEnabled: Boolean,
     onHeuristicShadowModeEnabledChange: (Boolean) -> Unit,
+    isProUnlocked: Boolean = false,
+    heuristicSettings: HeuristicSettings = HeuristicSettings(),
+    onHeuristicSettingsChange: (HeuristicSettings) -> Unit = {},
+    onRequestProUpsell: () -> Unit = {},
     callerIdBubbleEnabled: Boolean,
     onCallerIdBubbleEnabledChange: (Boolean) -> Unit,
     onDismiss: () -> Unit,
@@ -307,6 +316,15 @@ fun CallSettingsSheet(
                 )
             }
 
+            if (callFilteringEnabled && heuristicDetectionEnabled) {
+                AdvancedHeuristicSettings(
+                    isProUnlocked = isProUnlocked,
+                    settings = heuristicSettings,
+                    onSettingsChange = onHeuristicSettingsChange,
+                    onRequestProUpsell = onRequestProUpsell,
+                )
+            }
+
             Row(
                 modifier =
                     Modifier
@@ -347,5 +365,114 @@ fun CallSettingsSheet(
 
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+}
+
+@Composable
+private fun AdvancedHeuristicSettings(
+    isProUnlocked: Boolean,
+    settings: HeuristicSettings,
+    onSettingsChange: (HeuristicSettings) -> Unit,
+    onRequestProUpsell: () -> Unit,
+) {
+    if (!isProUnlocked) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable(onClick = onRequestProUpsell),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Lock,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Réglages avancés de l'heuristique",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    text = "Fenêtre d'historique, seuil et sensibilité — réservé à Sentinelle Pro.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        return
+    }
+
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Rounded.Tune,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.tertiary,
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Réglages avancés de l'heuristique",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LabeledSlider(
+            label = "Fenêtre d'historique",
+            valueLabel = "${settings.historyWindowDays} j",
+            value = settings.historyWindowDays.toFloat(),
+            valueRange =
+                HeuristicSettings.MIN_HISTORY_WINDOW_DAYS.toFloat()..
+                    HeuristicSettings.MAX_HISTORY_WINDOW_DAYS.toFloat(),
+            steps = HeuristicSettings.MAX_HISTORY_WINDOW_DAYS - HeuristicSettings.MIN_HISTORY_WINDOW_DAYS - 1,
+            onValueChange = { onSettingsChange(settings.copy(historyWindowDays = it.toInt())) },
+        )
+
+        LabeledSlider(
+            label = "Seuil de blocage",
+            valueLabel = "${(settings.blockThreshold * 100).toInt()} %",
+            value = settings.blockThreshold.toFloat(),
+            valueRange = HeuristicSettings.MIN_BLOCK_THRESHOLD.toFloat()..HeuristicSettings.MAX_BLOCK_THRESHOLD.toFloat(),
+            onValueChange = { onSettingsChange(settings.copy(blockThreshold = it.toDouble())) },
+        )
+
+        LabeledSlider(
+            label = "Sensibilité",
+            valueLabel = "${(settings.sensitivity * 100).toInt()} %",
+            value = settings.sensitivity.toFloat(),
+            valueRange = HeuristicSettings.MIN_SENSITIVITY.toFloat()..HeuristicSettings.MAX_SENSITIVITY.toFloat(),
+            onValueChange = { onSettingsChange(settings.copy(sensitivity = it.toDouble())) },
+        )
+    }
+}
+
+@Composable
+private fun LabeledSlider(
+    label: String,
+    valueLabel: String,
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+    steps: Int = 0,
+) {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween) {
+            Text(text = label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(text = valueLabel, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+        }
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            steps = steps,
+        )
     }
 }

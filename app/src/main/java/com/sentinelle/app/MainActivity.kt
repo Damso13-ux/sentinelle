@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -51,6 +52,7 @@ import com.sentinelle.app.ui.screen.ReportScreen
 import com.sentinelle.app.ui.screen.SettingsScreen
 import com.sentinelle.app.ui.theme.AppTheme
 import com.sentinelle.app.util.NotificationUtils
+import com.sentinelle.app.util.PreferencesManager
 import com.sentinelle.app.worker.ListUpdateWorker
 
 data class BottomNavItem(
@@ -85,7 +87,11 @@ class MainActivity : ComponentActivity() {
         shortcutDestination = intent?.getStringExtra(EXTRA_SHORTCUT_DESTINATION)
 
         setContent {
-            AppTheme {
+            val themeVariant by PreferencesManager
+                .getEffectiveThemeVariantFlow(this)
+                .collectAsState(initial = com.sentinelle.app.ui.theme.ThemeVariant.GARDE)
+
+            AppTheme(themeVariant = themeVariant) {
                 SentinelleApp(
                     shortcutDestination = shortcutDestination,
                     onShortcutDestinationConsumed = { shortcutDestination = null },

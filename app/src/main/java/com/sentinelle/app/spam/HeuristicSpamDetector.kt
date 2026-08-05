@@ -2,6 +2,8 @@ package com.sentinelle.app.spam
 
 import android.content.Context
 import com.sentinelle.app.data.AppDatabase
+import com.sentinelle.app.util.PreferencesManager
+import kotlinx.coroutines.runBlocking
 import java.util.Calendar
 
 // Rule-based spam scorer — no ML model, no training data, no dataset.
@@ -9,10 +11,18 @@ import java.util.Calendar
 // deliberately not a signal: Call.Details doesn't expose it at screening
 // time, and reading it after the fact would need READ_CALL_LOG, which
 // Sentinelle doesn't request.
+//
+// History window and sensitivity are Pro-gated tuning knobs (see
+// HeuristicSettings) — free users always get the values below, which are
+// exactly what this detector did before tuning existed.
 object HeuristicSpamDetector : SpamDetector {
-    const val BLOCK_THRESHOLD = 0.75
+    @Deprecated(
+        "Not the effective threshold when Pro tuning is active — use " +
+            "PreferencesManager.getEffectiveHeuristicSettings(context).blockThreshold instead.",
+        ReplaceWith("HeuristicSettings.DEFAULT_BLOCK_THRESHOLD"),
+    )
+    const val BLOCK_THRESHOLD = HeuristicSettings.DEFAULT_BLOCK_THRESHOLD
 
-    private const val HISTORY_WINDOW_MILLIS = 7 * 24 * 60 * 60 * 1000L
     private const val DAY_MILLIS = 24 * 60 * 60 * 1000L
 
     private const val FREQUENCY_SATURATION = 8.0
@@ -34,12 +44,13 @@ object HeuristicSpamDetector : SpamDetector {
         context: Context,
     ): SpamScore {
         val now = System.currentTimeMillis()
+        val settings = runBlocking { PreferencesManager.getEffectiveHeuristicSettings(context) }
         val timestamps =
             AppDatabase
                 .getInstance(context)
                 .callHistoryDao()
-                .getTimestampsForNumberSince(phoneNumber, now - HISTORY_WINDOW_MILLIS)
-        return scoreFromHistory(timestamps, now, phoneNumber)
+                .getTimestampsForNumberSince(phoneNumber, now - settings.historyWindowDays * DAY_MILLIS)
+        return scoreFromHistory(timestamps, now, phoneNumber, settings.sensitivity)
     }
 
     override fun scoreSms(
@@ -48,20 +59,25 @@ object HeuristicSpamDetector : SpamDetector {
         context: Context,
     ): SpamScore {
         val now = System.currentTimeMillis()
+        val settings = runBlocking { PreferencesManager.getEffectiveHeuristicSettings(context) }
         val timestamps =
             AppDatabase
                 .getInstance(context)
                 .smsHistoryDao()
-                .getTimestampsForNumberSince(phoneNumber, now - HISTORY_WINDOW_MILLIS)
-        return scoreFromHistory(timestamps, now, phoneNumber)
+                .getTimestampsForNumberSince(phoneNumber, now - settings.historyWindowDays * DAY_MILLIS)
+        return scoreFromHistory(timestamps, now, phoneNumber, settings.sensitivity)
     }
 
     // Pure scoring logic — no Android/Room dependency, so it's directly
-    // unit-testable (see HeuristicSpamDetectorTest).
+    // unit-testable (see HeuristicSpamDetectorTest). sensitivity is a
+    // Pro-gated multiplier (see HeuristicSettings) applied to the summed
+    // score before clamping — 1.0 (the default) reproduces the original,
+    // untunable behavior exactly.
     fun scoreFromHistory(
         timestamps: List<Long>,
         now: Long,
         phoneNumber: Long,
+        sensitivity: Double = HeuristicSettings.DEFAULT_SENSITIVITY,
     ): SpamScore {
         var score = 0.0
         val signals = mutableListOf<String>()
@@ -92,7 +108,7 @@ object HeuristicSpamDetector : SpamDetector {
         }
 
         return SpamScore(
-            score = score.coerceIn(0.0, 1.0),
+            score = (score * sensitivity).coerceIn(0.0, 1.0),
             reason = signals.firstOrNull(),
             signals = signals,
         )
