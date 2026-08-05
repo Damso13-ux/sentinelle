@@ -28,6 +28,9 @@ interface BlockedEventDao {
     @Query("SELECT * FROM blocked_events ORDER BY timestamp DESC")
     fun getAll(): List<BlockedEventEntity>
 
+    @Query("SELECT * FROM blocked_events ORDER BY timestamp DESC LIMIT :limit")
+    fun getRecent(limit: Int): List<BlockedEventEntity>
+
     @Query("SELECT COUNT(*) FROM blocked_events")
     fun getCountFlow(): Flow<Int>
 

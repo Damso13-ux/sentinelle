@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sentinelle.app.data.AppDatabase
+import com.sentinelle.app.data.BlockedEventEntity
 import com.sentinelle.app.data.DayCount
+import com.sentinelle.app.data.HeuristicShadowEventEntity
 import com.sentinelle.app.data.NumberLabelEntity
 import com.sentinelle.app.data.PatternListEntity
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +39,8 @@ data class DashboardUiState(
     val blockedSms: Int = 0,
     val dailyTrend: List<DayCount> = emptyList(),
     val topBlockedNumbers: List<TopBlockedNumberDisplay> = emptyList(),
+    val recentEvents: List<BlockedEventEntity> = emptyList(),
+    val shadowEvents: List<HeuristicShadowEventEntity> = emptyList(),
 )
 
 class DashboardViewModel(
@@ -77,6 +81,10 @@ class DashboardViewModel(
                     val byChannel =
                         eventDao.getCountByChannelSince(since).associate { it.channel to it.count }
                     val trend = eventDao.getCountByDaySince(since)
+                    // Recent activity is a feed, not a range-scoped stat — always
+                    // shows the latest events regardless of the selected range.
+                    val recent = eventDao.getRecent(limit = 15)
+                    val shadow = db.heuristicShadowEventDao().getRecent(limit = 15)
                     val top =
                         eventDao.getTopBlockedNumbersSince(since, limit = 5).map { entry ->
                             TopBlockedNumberDisplay(
@@ -96,6 +104,8 @@ class DashboardViewModel(
                         blockedSms = byChannel[PatternListEntity.CHANNEL_SMS] ?: 0,
                         dailyTrend = trend,
                         topBlockedNumbers = top,
+                        recentEvents = recent,
+                        shadowEvents = shadow,
                     )
                 }
             _uiState.value = newState

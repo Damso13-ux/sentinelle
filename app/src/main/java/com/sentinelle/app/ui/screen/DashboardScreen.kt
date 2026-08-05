@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -47,8 +48,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sentinelle.app.data.BlockedEventEntity
 import com.sentinelle.app.data.DayCount
+import com.sentinelle.app.data.HeuristicShadowEventEntity
+import com.sentinelle.app.data.PatternListEntity
+import com.sentinelle.app.ui.formatBlockReason
 import com.sentinelle.app.ui.viewmodel.dashboard.DashboardViewModel
+import java.text.DateFormat
+import java.util.Locale
 import com.sentinelle.app.ui.viewmodel.dashboard.DashboardViewModelFactory
 import com.sentinelle.app.ui.viewmodel.dashboard.TimeRange
 import com.sentinelle.app.ui.viewmodel.dashboard.TopBlockedNumberDisplay
@@ -96,6 +103,10 @@ fun DashboardScreen(
             SummaryRow(total = uiState.totalBlocked, calls = uiState.blockedCalls, sms = uiState.blockedSms)
             TrendCard(dailyTrend = uiState.dailyTrend)
             TopNumbersCard(topBlockedNumbers = uiState.topBlockedNumbers)
+            RecentEventsCard(events = uiState.recentEvents)
+            if (uiState.shadowEvents.isNotEmpty()) {
+                ShadowEventsCard(events = uiState.shadowEvents)
+            }
         }
     }
 
@@ -299,6 +310,127 @@ private fun TopNumbersCard(topBlockedNumbers: List<TopBlockedNumberDisplay>) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RecentEventsCard(events: List<BlockedEventEntity>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = "Derniers blocages",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+            if (events.isEmpty()) {
+                Text(
+                    text = "Aucun blocage récent.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                events.forEach { event -> RecentEventRow(event) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RecentEventRow(event: BlockedEventEntity) {
+    val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.FRANCE) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            imageVector = if (event.channel == PatternListEntity.CHANNEL_SMS) Icons.Rounded.Sms else Icons.Rounded.Phone,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(18.dp),
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = if (event.phoneNumber == 0L) "Numéro masqué" else formatPhoneNumber(event.phoneNumber),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = formatBlockReason(event),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            text = dateFormat.format(java.util.Date(event.timestamp)),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ShadowEventsCard(events: List<HeuristicShadowEventEntity>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
+    ) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = "Simulation (mode silencieux)",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = "Ce que l'heuristique aurait bloqué si le mode silencieux était désactivé.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = 4.dp),
+            )
+            events.forEach { event -> ShadowEventRow(event) }
+        }
+    }
+}
+
+@Composable
+private fun ShadowEventRow(event: HeuristicShadowEventEntity) {
+    val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.FRANCE) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(
+            imageVector = if (event.channel == PatternListEntity.CHANNEL_SMS) Icons.Rounded.Sms else Icons.Rounded.Phone,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.size(18.dp),
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = formatPhoneNumber(event.phoneNumber),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = event.reason ?: "Score ${(event.score * 100).toInt()}%",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            text = dateFormat.format(java.util.Date(event.timestamp)),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
