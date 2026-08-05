@@ -71,11 +71,17 @@ l'application" wipes everything on-device immediately.
 - Full descriptions (`metadata/{en-US,fr-FR}/full_description.txt`) — updated for Sentinelle ✅
 - Store icon `metadata/{en-US,fr-FR}/images/icon.png` (512×512) — generated from the "Garde" shield, Play-ready ✅
 - Feature graphic `metadata/{en-US,fr-FR}/images/featureGraphic.png` (1024×500) — generated, Play-ready ✅
-- Screenshots (`metadata/*/images/phoneScreenshots/`) — **deleted**, the old ones were literally branded "avec Saracroche" (a different app). No replacement yet — this needs real screens captured from a device running the current build (I can't fabricate believable ones; nothing here I can do without your phone) ⚠️ **blocking**
+- Screenshots (`metadata/*/images/phoneScreenshots/1-5.jpg`) — real captures from the current build: Accueil, Statistiques, Signaler, Listes, Réglages ✅
 
 ## Other blockers before submission
 
-- [ ] Enable GitHub Pages for the privacy policy (`docs/index.html`) — see README/commit `1659786`
+- [x] Enable GitHub Pages for the privacy policy — live at https://damso13-ux.github.io/sentinelle/
 - [ ] New developer accounts must run a closed test (Play's current policy: ~12 testers for ~14 days) before Production release is unlocked
 - [ ] Content rating questionnaire (Play Console, straightforward — no mature content)
 - [ ] Target audience / age declaration (Play Console)
+
+## Status: ready to submit
+
+All repo-side prep is done — AAB, store assets, screenshots, privacy policy,
+permission justifications. What's left only happens inside Play Console
+itself (upload, forms, closed test).
