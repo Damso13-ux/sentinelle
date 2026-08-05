@@ -29,6 +29,27 @@ class SentinelleWidgetProvider : AppWidgetProvider() {
     companion object {
         private const val TAG = "SentinelleWidget"
 
+        /**
+         * Asks the launcher to pin the widget directly, skipping the manual
+         * "long-press home screen → Widgets → find Sentinelle → drag" flow.
+         * Not every launcher supports this (some MIUI versions don't) — returns
+         * false so the caller can show a fallback explanation.
+         */
+        fun requestPin(context: Context): Boolean =
+            try {
+                val appWidgetManager = AppWidgetManager.getInstance(context)
+                val provider = ComponentName(context, SentinelleWidgetProvider::class.java)
+                if (appWidgetManager.isRequestPinAppWidgetSupported) {
+                    appWidgetManager.requestPinAppWidget(provider, null, null)
+                    true
+                } else {
+                    false
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error requesting widget pin", e)
+                false
+            }
+
         fun requestUpdate(context: Context) {
             try {
                 val manager = AppWidgetManager.getInstance(context)

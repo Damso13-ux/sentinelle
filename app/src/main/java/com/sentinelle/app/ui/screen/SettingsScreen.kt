@@ -25,6 +25,7 @@ import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -62,6 +63,7 @@ import androidx.work.workDataOf
 import com.sentinelle.app.service.ListService
 import com.sentinelle.app.ui.sheet.DebugSheet
 import com.sentinelle.app.util.PermissionUtils
+import com.sentinelle.app.widget.SentinelleWidgetProvider
 import com.sentinelle.app.worker.ListUpdateWorker
 import kotlinx.coroutines.launch
 
@@ -265,6 +267,21 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                             title = "Activer ou désactiver l'accès aux notifications pour le masquage des SMS",
                             icon = Icons.Rounded.Notifications,
                             onClick = { PermissionUtils.openNotificationListenerSettings(context) },
+                        ),
+                        SettingsItem.Action(
+                            title = "Ajouter le widget à l'écran d'accueil",
+                            icon = Icons.Rounded.Widgets,
+                            onClick = {
+                                val pinned = SentinelleWidgetProvider.requestPin(context)
+                                if (!pinned) {
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            "Ajoute-le manuellement : appui long sur l'écran d'accueil → Widgets → Sentinelle",
+                                            Toast.LENGTH_LONG,
+                                        ).show()
+                                }
+                            },
                         ),
                         SettingsItem.Action(
                             title = "Réinstaller les listes de blocage",
