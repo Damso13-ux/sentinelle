@@ -1,5 +1,6 @@
 package com.sentinelle.app.ui.screen
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -21,10 +22,12 @@ import androidx.compose.material.icons.rounded.ChatBubble
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.DeleteForever
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material.icons.rounded.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -38,6 +41,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,9 +65,11 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.sentinelle.app.billing.BillingManager
 import com.sentinelle.app.service.ListService
 import com.sentinelle.app.ui.sheet.DebugSheet
 import com.sentinelle.app.util.PermissionUtils
+import com.sentinelle.app.util.PreferencesManager
 import com.sentinelle.app.widget.SentinelleWidgetProvider
 import com.sentinelle.app.worker.ListUpdateWorker
 import kotlinx.coroutines.launch
@@ -230,6 +237,16 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
     var showDebugSheet by remember { mutableStateOf(false) }
     var bisouTapCount by remember { mutableIntStateOf(0) }
 
+    val proUnlocked by PreferencesManager.getProUnlockedFlow(context).collectAsState(initial = false)
+    val billingManager = remember { BillingManager(context) }
+    DisposableEffect(Unit) {
+        // Re-checks Play's purchase records on every visit to this screen,
+        // not just after a purchase — a refund or a restore on a new
+        // device needs to be reflected here too.
+        billingManager.startConnection()
+        onDispose { billingManager.endConnection() }
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -292,6 +309,42 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                             title = "Réinitialiser l'application",
                             icon = Icons.Rounded.DeleteForever,
                             onClick = { showResetDialog = true },
+                        ),
+                    ),
+            )
+
+            // Sentinelle Pro Section
+            SettingsSection(
+                title = "Sentinelle Pro",
+                items =
+                    listOf(
+                        SettingsItem.Action(
+                            title = if (proUnlocked) "Sentinelle Pro actif" else "Débloquer Sentinelle Pro",
+                            subtitle =
+                                if (proUnlocked) {
+                                    "Merci pour ton soutien ! Export des stats, historique étendu, thèmes et réglages avancés sont débloqués."
+                                } else {
+                                    "Export des stats, historique étendu, thèmes additionnels, réglages avancés de l'heuristique."
+                                },
+                            icon = Icons.Rounded.WorkspacePremium,
+                            onClick = {
+                                if (proUnlocked) {
+                                    Toast.makeText(context, "Déjà débloqué — merci !", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    val activity = context as? Activity
+                                    if (activity != null) {
+                                        billingManager.launchPurchaseFlow(activity) { error ->
+                                            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
+                            },
+                        ),
+                        SettingsItem.Action(
+                            title = "Faire un don",
+                            subtitle = "Soutenir le développement sans passer par un achat intégré.",
+                            icon = Icons.Rounded.Favorite,
+                            onClick = { openDonate(context) },
                         ),
                     ),
             )
@@ -467,6 +520,15 @@ private fun openMastodon(context: Context) {
 private fun openPrivacyPolicy(context: Context) {
     try {
         val intent = Intent(Intent.ACTION_VIEW, "https://damso13-ux.github.io/sentinelle/".toUri())
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        // Handle error silently
+    }
+}
+
+private fun openDonate(context: Context) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, "https://paypal.me/mycookies".toUri())
         context.startActivity(intent)
     } catch (e: Exception) {
         // Handle error silently

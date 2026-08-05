@@ -46,6 +46,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import com.sentinelle.app.BuildConfig
 import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.util.PatternManager
 import com.sentinelle.app.util.PreferencesManager
@@ -63,11 +64,13 @@ fun DebugSheet(onDismiss: () -> Unit) {
     var deviceId by remember { mutableStateOf("") }
     var countryCodes by remember { mutableStateOf("") }
     var apiKey by remember { mutableStateOf<String?>(null) }
+    var proUnlocked by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         deviceId = PreferencesManager.getDeviceId(context)
         countryCodes = PreferencesManager.getCountryCodes(context)
         apiKey = PreferencesManager.getApiKey(context)
+        proUnlocked = PreferencesManager.isProUnlocked(context)
     }
 
     ModalBottomSheet(
@@ -261,6 +264,36 @@ fun DebugSheet(onDismiss: () -> Unit) {
                     }
                 },
             )
+
+            // Debug-only: simulates the Pro entitlement locally so gated UI
+            // can be built and tested before a real "sentinelle_pro"
+            // product exists in Play Console (merchant profile pending
+            // verification as of this writing). Gated on BuildConfig.DEBUG
+            // specifically — not just on DebugSheet being reachable — since
+            // this sheet opens in release builds too via the triple-tap on
+            // the Settings footer. Never present in a release build.
+            if (BuildConfig.DEBUG) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                DebugButton(
+                    title = if (proUnlocked) "Pro (debug) : activé — désactiver" else "Pro (debug) : désactivé — activer",
+                    backgroundColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                    onClick = {
+                        coroutineScope.launch {
+                            val newValue = !proUnlocked
+                            PreferencesManager.setProUnlocked(context, newValue)
+                            proUnlocked = newValue
+                            Toast
+                                .makeText(
+                                    context,
+                                    if (newValue) "✅ Pro simulé activé (debug uniquement)." else "Pro simulé désactivé.",
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
+                    },
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
         }

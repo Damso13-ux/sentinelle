@@ -58,6 +58,16 @@ object PreferencesManager {
     // detector to block for real.
     private val HEURISTIC_SHADOW_MODE_ENABLED_KEY = booleanPreferencesKey("heuristic_shadow_mode_enabled")
 
+    // Whether the one-time "Sentinelle Pro" purchase is unlocked (export
+    // des stats, historique étendu, thèmes additionnels, réglages avancés
+    // de l'heuristique). Kept in sync with Play Billing by BillingManager,
+    // which re-checks Play's own purchase records on every app start rather
+    // than trusting this flag blindly — it's a local cache of entitlement,
+    // not the source of truth. DebugSheet can also flip it directly, but
+    // only in debug builds (see BuildConfig.DEBUG check there), to test
+    // Pro-gated UI before a real Play Console product exists.
+    private val PRO_UNLOCKED_KEY = booleanPreferencesKey("pro_unlocked")
+
     private val DEFAULT_COUNTRY_PREFIXES = setOf("33")
     private const val DEFAULT_COUNTRY_CODES = "FR"
 
@@ -371,6 +381,26 @@ object PreferencesManager {
     ) {
         context.dataStore.edit { preferences ->
             preferences[HEURISTIC_SHADOW_MODE_ENABLED_KEY] = enabled
+        }
+    }
+
+    fun getProUnlockedFlow(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { preferences ->
+            preferences[PRO_UNLOCKED_KEY] ?: false
+        }
+
+    suspend fun isProUnlocked(context: Context): Boolean =
+        context.dataStore.data
+            .map { preferences ->
+                preferences[PRO_UNLOCKED_KEY] ?: false
+            }.first()
+
+    suspend fun setProUnlocked(
+        context: Context,
+        unlocked: Boolean,
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences[PRO_UNLOCKED_KEY] = unlocked
         }
     }
 }

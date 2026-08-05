@@ -69,6 +69,10 @@ android {
     }
     buildFeatures {
         compose = true
+        // Needed for BuildConfig.DEBUG, used to keep the debug-only Pro
+        // unlock toggle (DebugSheet) out of release builds regardless of
+        // how the sheet itself is reached.
+        buildConfig = true
     }
     buildToolsVersion = "37.0.0"
 }
@@ -110,6 +114,9 @@ dependencies {
 
     // WorkManager
     implementation(libs.androidx.work.runtime.ktx)
+
+    // Play Billing — single non-consumable "Sentinelle Pro" product
+    implementation(libs.billing)
 
     // For debugging
     debugImplementation(libs.androidx.ui.tooling)
