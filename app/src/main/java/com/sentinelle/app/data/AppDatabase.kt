@@ -15,8 +15,9 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         BlockedEventEntity::class,
         CallHistoryEntity::class,
         NumberLabelEntity::class,
+        SmsHistoryEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -33,6 +34,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun callHistoryDao(): CallHistoryDao
 
     abstract fun numberLabelDao(): NumberLabelDao
+
+    abstract fun smsHistoryDao(): SmsHistoryDao
 
     fun seedUserLists() {
         val dao = patternListDao()
@@ -202,13 +205,31 @@ abstract class AppDatabase : RoomDatabase() {
                 }
             }
 
+        private val MIGRATION_4_5 =
+            object : Migration(4, 5) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL(
+                        """
+                        CREATE TABLE IF NOT EXISTS sms_history (
+                            id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+                            phoneNumber INTEGER NOT NULL,
+                            timestamp INTEGER NOT NULL,
+                            wasBlocked INTEGER NOT NULL
+                        )
+                        """,
+                    )
+                    db.execSQL("CREATE INDEX IF NOT EXISTS index_sms_history_phoneNumber ON sms_history(phoneNumber)")
+                    db.execSQL("CREATE INDEX IF NOT EXISTS index_sms_history_timestamp ON sms_history(timestamp)")
+                }
+            }
+
         private fun buildDatabase(context: Context): AppDatabase =
             Room
                 .databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "sentinelle.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .fallbackToDestructiveMigration(false)
                 .allowMainThreadQueries()
                 .build()

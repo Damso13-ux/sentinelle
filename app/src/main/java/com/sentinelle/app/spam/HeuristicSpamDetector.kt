@@ -46,10 +46,15 @@ object HeuristicSpamDetector : SpamDetector {
         phoneNumber: Long,
         prefixes: Set<String>,
         context: Context,
-    ): SpamScore =
-        // Only call history is tracked today (see CallHistoryEntity) — no
-        // heuristic signal for SMS yet.
-        SpamScore(score = 0.0, reason = null)
+    ): SpamScore {
+        val now = System.currentTimeMillis()
+        val timestamps =
+            AppDatabase
+                .getInstance(context)
+                .smsHistoryDao()
+                .getTimestampsForNumberSince(phoneNumber, now - HISTORY_WINDOW_MILLIS)
+        return scoreFromHistory(timestamps, now, phoneNumber)
+    }
 
     // Pure scoring logic — no Android/Room dependency, so it's directly
     // unit-testable (see HeuristicSpamDetectorTest).

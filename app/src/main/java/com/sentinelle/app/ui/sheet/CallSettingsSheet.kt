@@ -253,8 +253,9 @@ fun CallSettingsSheet(
                     Text(
                         text =
                             "Bloque aussi les numéros non répertoriés qui présentent un comportement " +
-                                "suspect (fréquence d'appels, horaires...). Nécessite de conserver un historique " +
-                                "des appels filtrés uniquement sur cet appareil, jamais envoyé en ligne.",
+                                "suspect (fréquence, horaires...), pour les appels comme pour les SMS. " +
+                                "Nécessite de conserver un historique des appels et SMS filtrés uniquement " +
+                                "sur cet appareil, jamais envoyé en ligne.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

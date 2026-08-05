@@ -6,7 +6,9 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.core.os.BundleCompat
+import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.data.PatternListEntity
+import com.sentinelle.app.data.SmsHistoryEntity
 import com.sentinelle.app.util.PatternManager
 import com.sentinelle.app.util.PhoneNumberMatcher
 import com.sentinelle.app.util.PreferencesManager
@@ -99,6 +101,27 @@ class SmsNotificationListener : NotificationListenerService() {
                     phoneNumber?.let {
                         PatternManager.evaluateSms(it, countryPrefixes, this@SmsNotificationListener)
                     }
+
+                if (phoneNumber != null) {
+                    try {
+                        val historyTrackingEnabled =
+                            PreferencesManager.isCallHistoryTrackingEnabled(this@SmsNotificationListener)
+                        if (historyTrackingEnabled) {
+                            AppDatabase
+                                .getInstance(this@SmsNotificationListener)
+                                .smsHistoryDao()
+                                .insert(
+                                    SmsHistoryEntity(
+                                        phoneNumber = phoneNumber,
+                                        timestamp = System.currentTimeMillis(),
+                                        wasBlocked = action is SmsAction.Hide,
+                                    ),
+                                )
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error logging SMS history", e)
+                    }
+                }
 
                 if (action is SmsAction.Hide) {
                     Log.d(

@@ -43,7 +43,7 @@ object PreferencesManager {
     private val SMS_BLOCKING_ENABLED_KEY = booleanPreferencesKey("sms_blocking_enabled")
     private val BLOCKED_SMS_NOTIFICATION_KEY = booleanPreferencesKey("blocked_sms_notification")
 
-    // Off by default: no call history is written and no heuristic scoring
+    // Off by default: no call/SMS history is written and no heuristic scoring
     // runs unless the user explicitly opts in (see CallSettingsSheet). Local
     // only — this is never uploaded anywhere.
     private val CALL_HISTORY_TRACKING_ENABLED_KEY = booleanPreferencesKey("call_history_tracking_enabled")
@@ -295,8 +295,8 @@ object PreferencesManager {
 
     /**
      * Whether the on-device heuristic spam detector is allowed to keep a
-     * short local history of filtered calls (never uploaded) so it can score
-     * frequency/timing signals. Off by default.
+     * short local history of filtered calls and SMS (never uploaded) so it
+     * can score frequency/timing signals. Off by default.
      */
     fun getCallHistoryTrackingEnabledFlow(context: Context): Flow<Boolean> =
         context.dataStore.data.map { preferences ->

@@ -171,6 +171,22 @@ object PatternManager {
                 SmsAction.Keep
             }
         }
+
+        // No pattern list match — same opt-in heuristic fallback as evaluateCall.
+        val historyTrackingEnabled =
+            try {
+                runBlocking { PreferencesManager.isCallHistoryTrackingEnabled(context) }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error reading call history tracking preference", e)
+                false
+            }
+        if (historyTrackingEnabled) {
+            val score = SpamDetectorProvider.get().scoreSms(phoneNumber, prefixes, context)
+            if (score.score >= HeuristicSpamDetector.BLOCK_THRESHOLD) {
+                return SmsAction.Hide(BlockSource.Heuristic(score.score, score.reason))
+            }
+        }
+
         return SmsAction.Keep
     }
 }
