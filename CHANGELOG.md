@@ -16,7 +16,7 @@ et ce projet respecte le [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 - Action rapide « Ce n'est pas un spam » sur les notifications d'appel bloqué
 - Widget d'écran d'accueil et raccourcis d'application (App Shortcuts)
 - Détection des réglages d'optimisation de batterie pouvant empêcher un filtrage fiable (MIUI et équivalents)
-- Débloquage optionnel « Sentinelle Pro » (achat unique via Google Play Facturation, jamais d'abonnement) : export CSV, historique heuristique étendu (jusqu'à 30 jours), deux thèmes additionnels (Corail, Violet), réglages avancés de détection ; lien de don optionnel (PayPal)
+- Débloquage optionnel « Sentinelle Pro » (achat unique via Google Play Facturation, jamais d'abonnement) : export CSV, historique heuristique étendu (jusqu'à 30 jours), deux thèmes additionnels (Océan, Prune), réglages avancés de détection ; lien de don optionnel (PayPal)
 - Intégration continue (GitHub Actions) sur chaque push/PR
 
 ### Corrigé
@@ -27,7 +27,7 @@ et ce projet respecte le [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 ### Modifié
 
 - Forké depuis Saracroche v5.1.1 et rebrandé en Sentinelle (nouveau package `com.sentinelle.app`) ; voir [NOTICE](NOTICE) pour l'attribution et un résumé des changements.
-- Refonte visuelle complète (thème sombre « Garde »)
+- Refonte visuelle et structurelle complète : identité indigo, thèmes clair et sombre, navigation ramenée à trois onglets (Accueil / Activité / Réglages), nouvelle icône de lancement
 
 ## [5.1.1] - 2026-07-22
 
