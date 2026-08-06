@@ -123,35 +123,35 @@ class ProEntitlementTest {
     // --- Theme gating -----------------------------------------------------
 
     @Test
-    fun themeVariantFallsBackToGardeWhileProIsLocked() =
+    fun themeVariantFallsBackToIndigoWhileProIsLocked() =
         runTest {
-            PreferencesManager.setThemeVariant(context, ThemeVariant.VIOLET)
-            assertEquals(ThemeVariant.GARDE, PreferencesManager.getEffectiveThemeVariantFlow(context).first())
+            PreferencesManager.setThemeVariant(context, ThemeVariant.PRUNE)
+            assertEquals(ThemeVariant.INDIGO, PreferencesManager.getEffectiveThemeVariantFlow(context).first())
             // The choice is remembered, just not applied — so it comes back
             // if Pro is unlocked later rather than being silently discarded.
-            assertEquals(ThemeVariant.VIOLET, PreferencesManager.getStoredThemeVariantFlow(context).first())
+            assertEquals(ThemeVariant.PRUNE, PreferencesManager.getStoredThemeVariantFlow(context).first())
         }
 
     @Test
     fun themeVariantAppliesOnceProIsUnlocked() =
         runTest {
-            PreferencesManager.setThemeVariant(context, ThemeVariant.CORAIL)
+            PreferencesManager.setThemeVariant(context, ThemeVariant.OCEAN)
             PreferencesManager.setProUnlocked(context, true)
-            assertEquals(ThemeVariant.CORAIL, PreferencesManager.getEffectiveThemeVariantFlow(context).first())
+            assertEquals(ThemeVariant.OCEAN, PreferencesManager.getEffectiveThemeVariantFlow(context).first())
         }
 
     /**
      * The second half of the reported bug: with the debug unlock active,
-     * picking Corail/Violet applied — but coming back to Settings showed
-     * only Garde as selectable, because the effective theme had silently
+     * picking Océan/Prune applied — but coming back to Settings showed
+     * only Indigo as selectable, because the effective theme had silently
      * reverted along with the wiped entitlement.
      */
     @Test
     fun themeVariantAppliesUnderTheDebugOverrideToo() =
         runTest {
             PreferencesManager.setProDebugOverride(context, true)
-            PreferencesManager.setThemeVariant(context, ThemeVariant.CORAIL)
+            PreferencesManager.setThemeVariant(context, ThemeVariant.OCEAN)
             PreferencesManager.setProUnlocked(context, false)
-            assertEquals(ThemeVariant.CORAIL, PreferencesManager.getEffectiveThemeVariantFlow(context).first())
+            assertEquals(ThemeVariant.OCEAN, PreferencesManager.getEffectiveThemeVariantFlow(context).first())
         }
 }

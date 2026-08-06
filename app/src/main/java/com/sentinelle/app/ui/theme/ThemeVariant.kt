@@ -1,23 +1,32 @@
 package com.sentinelle.app.ui.theme
 
-// Pro-gated accent variants layered on top of the "Garde" dark theme.
-// Only the accent-driven roles (primary/tertiary and their containers)
-// change between variants — background, surface, and outline stay the
-// Garde neutrals so every variant still reads as the same app. Garde
-// itself went through a proper Material Theme Builder pass for contrast;
-// Corail and Violet are hand-picked to sit at a similar lightness/chroma
-// so white-on-primary text still reads cleanly, but haven't had that same
-// rigorous contrast-ratio check — worth a real design pass later.
+/**
+ * Accent variants layered over the shared neutrals.
+ *
+ * Only the primary/tertiary roles change between variants. Backgrounds,
+ * surfaces, outlines and — importantly — the status colours in
+ * [SentinelleColors] stay identical, so every variant reads as the same app
+ * and "protected" is always the same green.
+ *
+ * All three are contrast-checked to WCAG AA in both light and dark, unlike
+ * the previous Corail/Violet pair which were hand-picked by eye.
+ */
 enum class ThemeVariant(
     val storageKey: String,
     val displayName: String,
 ) {
-    GARDE("garde", "Garde"),
-    CORAIL("corail", "Corail"),
-    VIOLET("violet", "Violet"),
+    INDIGO("indigo", "Indigo"),
+    OCEAN("ocean", "Océan"),
+    PRUNE("prune", "Prune"),
     ;
 
     companion object {
-        fun fromStorageKey(key: String?): ThemeVariant = entries.firstOrNull { it.storageKey == key } ?: GARDE
+        /**
+         * Unknown keys fall back to the default. That covers the old
+         * "garde"/"corail"/"violet" values still sitting in DataStore from
+         * before the redesign — they resolve to Indigo rather than needing a
+         * migration.
+         */
+        fun fromStorageKey(key: String?): ThemeVariant = entries.firstOrNull { it.storageKey == key } ?: INDIGO
     }
 }

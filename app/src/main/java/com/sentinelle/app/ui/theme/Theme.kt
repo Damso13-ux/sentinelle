@@ -1,12 +1,15 @@
 package com.sentinelle.app.ui.theme
 
 import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 
 private val lightScheme =
@@ -89,16 +92,15 @@ private val darkScheme =
 
 @Composable
 fun AppTheme(
-    // Sentinelle is designed around its dark "Garde" look, so it defaults to
-    // dark regardless of the system setting — see MainActivity.
-    darkTheme: Boolean = true,
-    // Dynamic color is available on Android 12+, off by default to keep the
-    // "Garde" brand palette consistent across devices.
+    // Follows the system now. The app used to hard-code dark and never touch
+    // its own light scheme, which is a poor fit for a general-audience app —
+    // most people are on light or "follow system".
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Off by default: wallpaper-derived colour would override the accent, and
+    // with it the distinction between brand colour and status colour that the
+    // whole palette is built on.
     dynamicColor: Boolean = false,
-    // Pro-gated accent swap — see ThemeVariant. Only takes effect when
-    // dynamicColor is off, since dynamic color already overrides the accent
-    // from the device wallpaper.
-    themeVariant: ThemeVariant = ThemeVariant.GARDE,
+    themeVariant: ThemeVariant = ThemeVariant.INDIGO,
     content: @Composable () -> Unit,
 ) {
     val colorScheme =
@@ -108,47 +110,83 @@ fun AppTheme(
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             }
 
-            darkTheme -> withAccent(darkScheme, themeVariant)
+            darkTheme -> withAccent(darkScheme, themeVariant, dark = true)
 
-            else -> lightScheme
+            else -> withAccent(lightScheme, themeVariant, dark = false)
         }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = AppTypography,
-        content = content,
-    )
+    CompositionLocalProvider(
+        LocalSentinelleColors provides if (darkTheme) DarkSentinelleColors else LightSentinelleColors,
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = AppTypography,
+            content = content,
+        )
+    }
 }
 
+// tertiary tracks primary: the palette uses one accent, and leaving tertiary
+// on the base indigo would leak the default colour into the other variants.
 private fun withAccent(
-    base: androidx.compose.material3.ColorScheme,
+    base: ColorScheme,
     variant: ThemeVariant,
-) = when (variant) {
-    ThemeVariant.GARDE -> base
+    dark: Boolean,
+): ColorScheme =
+    when (variant) {
+        ThemeVariant.INDIGO -> base
 
-    ThemeVariant.CORAIL ->
-        base.copy(
-            primary = primaryDarkCorail,
-            onPrimary = onPrimaryDarkCorail,
-            primaryContainer = primaryContainerDarkCorail,
-            onPrimaryContainer = onPrimaryContainerDarkCorail,
-            tertiary = tertiaryDarkCorail,
-            onTertiary = onTertiaryDarkCorail,
-            tertiaryContainer = tertiaryContainerDarkCorail,
-            onTertiaryContainer = onTertiaryContainerDarkCorail,
-            inversePrimary = inversePrimaryDarkCorail,
-        )
+        ThemeVariant.OCEAN ->
+            if (dark) {
+                base.copy(
+                    primary = oceanPrimaryDark,
+                    onPrimary = oceanOnPrimaryDark,
+                    primaryContainer = oceanPrimaryContainerDark,
+                    onPrimaryContainer = oceanOnPrimaryContainerDark,
+                    tertiary = oceanPrimaryDark,
+                    onTertiary = oceanOnPrimaryDark,
+                    tertiaryContainer = oceanPrimaryContainerDark,
+                    onTertiaryContainer = oceanOnPrimaryContainerDark,
+                    inversePrimary = oceanPrimaryLight,
+                )
+            } else {
+                base.copy(
+                    primary = oceanPrimaryLight,
+                    onPrimary = oceanOnPrimaryLight,
+                    primaryContainer = oceanPrimaryContainerLight,
+                    onPrimaryContainer = oceanOnPrimaryContainerLight,
+                    tertiary = oceanPrimaryLight,
+                    onTertiary = oceanOnPrimaryLight,
+                    tertiaryContainer = oceanPrimaryContainerLight,
+                    onTertiaryContainer = oceanOnPrimaryContainerLight,
+                    inversePrimary = oceanPrimaryDark,
+                )
+            }
 
-    ThemeVariant.VIOLET ->
-        base.copy(
-            primary = primaryDarkViolet,
-            onPrimary = onPrimaryDarkViolet,
-            primaryContainer = primaryContainerDarkViolet,
-            onPrimaryContainer = onPrimaryContainerDarkViolet,
-            tertiary = tertiaryDarkViolet,
-            onTertiary = onTertiaryDarkViolet,
-            tertiaryContainer = tertiaryContainerDarkViolet,
-            onTertiaryContainer = onTertiaryContainerDarkViolet,
-            inversePrimary = inversePrimaryDarkViolet,
-        )
-}
+        ThemeVariant.PRUNE ->
+            if (dark) {
+                base.copy(
+                    primary = prunePrimaryDark,
+                    onPrimary = pruneOnPrimaryDark,
+                    primaryContainer = prunePrimaryContainerDark,
+                    onPrimaryContainer = pruneOnPrimaryContainerDark,
+                    tertiary = prunePrimaryDark,
+                    onTertiary = pruneOnPrimaryDark,
+                    tertiaryContainer = prunePrimaryContainerDark,
+                    onTertiaryContainer = pruneOnPrimaryContainerDark,
+                    inversePrimary = prunePrimaryLight,
+                )
+            } else {
+                base.copy(
+                    primary = prunePrimaryLight,
+                    onPrimary = pruneOnPrimaryLight,
+                    primaryContainer = prunePrimaryContainerLight,
+                    onPrimaryContainer = pruneOnPrimaryContainerLight,
+                    tertiary = prunePrimaryLight,
+                    onTertiary = pruneOnPrimaryLight,
+                    tertiaryContainer = prunePrimaryContainerLight,
+                    onTertiaryContainer = pruneOnPrimaryContainerLight,
+                    inversePrimary = prunePrimaryDark,
+                )
+            }
+    }

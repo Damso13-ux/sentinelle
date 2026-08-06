@@ -75,11 +75,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Sentinelle always renders its dark "Garde" theme, so status/nav bar
-        // icons stay light regardless of the system's day/night setting.
+        // auto(), not dark(): the app follows the system day/night setting
+        // now, and forcing the dark style would leave light system-bar icons
+        // sitting invisibly on a light background.
         enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(AndroidColor.TRANSPARENT),
-            navigationBarStyle = SystemBarStyle.dark(AndroidColor.TRANSPARENT),
+            statusBarStyle = SystemBarStyle.auto(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.auto(AndroidColor.TRANSPARENT, AndroidColor.TRANSPARENT),
         )
 
         NotificationUtils.createAllNotificationChannels(this)
@@ -89,7 +90,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeVariant by PreferencesManager
                 .getEffectiveThemeVariantFlow(this)
-                .collectAsState(initial = com.sentinelle.app.ui.theme.ThemeVariant.GARDE)
+                .collectAsState(initial = com.sentinelle.app.ui.theme.ThemeVariant.INDIGO)
 
             AppTheme(themeVariant = themeVariant) {
                 SentinelleApp(

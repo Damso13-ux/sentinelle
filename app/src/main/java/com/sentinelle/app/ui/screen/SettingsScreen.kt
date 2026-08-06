@@ -247,7 +247,7 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
 
     val proUnlocked by PreferencesManager.getProUnlockedFlow(context).collectAsState(initial = false)
     val selectedThemeVariant by
-        PreferencesManager.getStoredThemeVariantFlow(context).collectAsState(initial = ThemeVariant.GARDE)
+        PreferencesManager.getStoredThemeVariantFlow(context).collectAsState(initial = ThemeVariant.INDIGO)
     val billingManager = remember { BillingManager(context) }
     var proProductDetails by remember { mutableStateOf<ProductDetails?>(null) }
     // Debug-only shortcut: 3 taps on the Pro row flips the local debug
@@ -420,7 +420,7 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                     ),
             )
 
-            // Apparence Section — Corail/Violet are Pro, Garde always free.
+            // Apparence Section — Ocean/Prune are Pro, Indigo always free.
             Column {
                 Text(
                     text = "Apparence",
@@ -436,7 +436,7 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     ThemeVariant.entries.forEach { variant ->
-                        val locked = variant != ThemeVariant.GARDE && !proUnlocked
+                        val locked = variant != ThemeVariant.INDIGO && !proUnlocked
                         FilterChip(
                             selected = selectedThemeVariant == variant,
                             onClick = {

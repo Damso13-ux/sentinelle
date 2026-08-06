@@ -526,7 +526,7 @@ object PreferencesManager {
     fun getEffectiveThemeVariantFlow(context: Context): Flow<ThemeVariant> =
         context.dataStore.data.map { preferences ->
             if (!preferences.proUnlocked()) {
-                ThemeVariant.GARDE
+                ThemeVariant.INDIGO
             } else {
                 ThemeVariant.fromStorageKey(preferences[THEME_VARIANT_KEY])
             }
