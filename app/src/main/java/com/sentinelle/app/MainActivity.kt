@@ -145,6 +145,13 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// MainActivity is exported (required — it's the launcher), so this extra
+// can arrive from any app on the device, not just our own shortcuts.
+// navController.navigate() throws on an unknown route, so an unvalidated
+// value here is a free crash-on-demand for whoever wants to send it. Keep
+// this in sync with shortcuts.xml.
+private val VALID_SHORTCUT_DESTINATIONS = setOf("lookup", "report")
+
 @Preview
 @Composable
 fun SentinelleApp(
@@ -155,8 +162,10 @@ fun SentinelleApp(
 
     LaunchedEffect(shortcutDestination) {
         if (shortcutDestination != null) {
-            navController.navigate(shortcutDestination) {
-                popUpTo(navController.graph.findStartDestination().id)
+            if (shortcutDestination in VALID_SHORTCUT_DESTINATIONS) {
+                navController.navigate(shortcutDestination) {
+                    popUpTo(navController.graph.findStartDestination().id)
+                }
             }
             onShortcutDestinationConsumed()
         }

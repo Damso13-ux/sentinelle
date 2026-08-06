@@ -229,6 +229,17 @@ class NetworkService(
                 } else {
                     URL("$apiHost$listUrl")
                 }
+
+            // The API is third-party infra Sentinelle doesn't control — an
+            // absolute listUrl in its response must still point at that same
+            // host, or a compromised/misconfigured server could redirect
+            // list downloads anywhere it wants. Relative URLs (the common
+            // case) are already anchored to apiHost above and can't drift.
+            val expectedHost = URL(apiHost).host
+            if (!url.host.equals(expectedHost, ignoreCase = true)) {
+                throw NetworkError.Unknown()
+            }
+
             val connection = url.openConnection() as HttpURLConnection
 
             try {
