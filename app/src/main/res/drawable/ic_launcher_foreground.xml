@@ -1,16 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- "Garde" launcher icon foreground: a dark shield silhouette with a light
-     checkmark, sitting on the solid teal background (@color/ic_launcher_background).
-     Kept within the ~66dp adaptive-icon safe zone centered in the 108dp viewport. -->
+<!-- Launcher icon foreground: a solid white shield with the checkmark
+     knocked out of it, over the indigo background (@color/ic_launcher_background).
+
+     Two flat shapes rather than a dark shield carrying a separate coloured
+     tick: at 48dp the old version's three tones blurred into each other.
+     The checkmark is painted in the background indigo so it reads as a hole
+     in the shield, which survives being scaled down.
+
+     The whole mark sits inside the 66dp adaptive-icon safe zone (21..87 in
+     this 108dp viewport). The previous shield ran from y=20 to y=94 and
+     poked outside it, so aggressive launcher masks could clip its tip. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#0E1420"
-        android:pathData="M54,20 L78,29 L78,54 C78,73 67,87 54,94 C41,87 30,73 30,54 L30,29 Z" />
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,24 L76,32 L76,54 C76,71 66,81 54,84 C42,81 32,71 32,54 L32,32 Z" />
     <path
-        android:fillColor="#5DCAA5"
-        android:pathData="M44,56 L51,63 L66,44 L70,47 L52,70 L40,59 Z" />
+        android:fillColor="#3D4FC4"
+        android:pathData="M44,52 L51,59 L66,40 L70,43 L52,66 L40,55 Z" />
 </vector>
