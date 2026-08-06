@@ -46,8 +46,16 @@ interface BlockedEventDao {
     @Query("SELECT COUNT(*) FROM blocked_events WHERE timestamp >= :sinceTimestamp")
     fun getCountSince(sinceTimestamp: Long): Int
 
+    /**
+     * Days are bucketed in the device's local timezone ('localtime'), not
+     * UTC: without it a call blocked at 00:30 local lands in the previous
+     * UTC day and the user sees it counted as yesterday.
+     *
+     * Only returns days that actually have events — callers that draw a
+     * continuous axis must pad the gaps themselves (see padDailyTrend).
+     */
     @Query(
-        "SELECT date(timestamp / 1000, 'unixepoch') AS day, COUNT(*) AS count " +
+        "SELECT date(timestamp / 1000, 'unixepoch', 'localtime') AS day, COUNT(*) AS count " +
             "FROM blocked_events WHERE timestamp >= :sinceTimestamp " +
             "GROUP BY day ORDER BY day ASC",
     )
