@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.FormatListBulleted
+import androidx.compose.material.icons.rounded.Campaign
 import androidx.compose.material.icons.rounded.ChatBubble
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Code
@@ -233,7 +235,11 @@ fun SettingsSwitchItem(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun SettingsScreen(onResetApp: () -> Unit = {}) {
+fun SettingsScreen(
+    onOpenFilters: () -> Unit = {},
+    onOpenReport: () -> Unit = {},
+    onResetApp: () -> Unit = {},
+) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -294,6 +300,28 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                     .padding(paddingValues)
                     .verticalScroll(scrollState),
         ) {
+            // Took over the two tabs that left the bottom bar. "Mes filtres"
+            // rather than "Listes": what the user manages is which numbers
+            // get through, not the data structure holding them.
+            SettingsSection(
+                title = "Mes données",
+                items =
+                    listOf(
+                        SettingsItem.Action(
+                            title = "Mes filtres",
+                            subtitle = "Numéros et mots-clés que vous avez autorisés ou bloqués.",
+                            icon = Icons.AutoMirrored.Rounded.FormatListBulleted,
+                            onClick = onOpenFilters,
+                        ),
+                        SettingsItem.Action(
+                            title = "Signaler un numéro",
+                            subtitle = "Aider à améliorer les listes partagées.",
+                            icon = Icons.Rounded.Campaign,
+                            onClick = onOpenReport,
+                        ),
+                    ),
+            )
+
             // Configuration Section
             SettingsSection(
                 title = "Configuration",

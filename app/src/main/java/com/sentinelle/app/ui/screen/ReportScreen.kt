@@ -42,6 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -68,6 +69,9 @@ import com.sentinelle.app.ui.viewmodel.report.ReportViewModelFactory
 @Preview
 @Composable
 fun ReportScreen(
+    // Pre-filled when arriving from a number that was actually blocked,
+    // rather than making the user retype it from memory.
+    initialNumber: String? = null,
     viewModel: ReportViewModel =
         viewModel(
             factory =
@@ -81,6 +85,12 @@ fun ReportScreen(
     val focusManager = LocalFocusManager.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(initialNumber) {
+        if (!initialNumber.isNullOrBlank()) {
+            viewModel.updatePhoneNumber(initialNumber)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),

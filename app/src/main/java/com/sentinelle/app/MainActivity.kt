@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.FormatListBulleted
-import androidx.compose.material.icons.rounded.BarChart
-import androidx.compose.material.icons.rounded.Campaign
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
@@ -61,12 +59,25 @@ data class BottomNavItem(
     val icon: ImageVector,
 )
 
+// Three tabs, down from five.
+//
+// "Signaler" was a tab holding a blank form you had to retype a number
+// into from memory. It's now reached from a number you actually saw
+// blocked, which is both faster and more accurate — plus an entry in
+// Réglages for the rare case of reporting something out of the blue.
+//
+// "Listes" exposed prefixes, wildcards and priorities: internal machinery
+// a general-audience user shouldn't have to meet to use the app. It lives
+// in Réglages as "Mes filtres".
+//
+// Route ids stay as they were. They're internal, and "dashboard" still
+// describes what that screen is even though its tab now reads "Activité" —
+// renaming them would churn the shortcuts XML and the widget for no
+// user-visible gain.
 private val bottomNavItems =
     listOf(
         BottomNavItem("home", "Accueil", Icons.Rounded.Home),
-        BottomNavItem("dashboard", "Statistiques", Icons.Rounded.BarChart),
-        BottomNavItem("report", "Signaler", Icons.Rounded.Campaign),
-        BottomNavItem("lists", "Listes", Icons.AutoMirrored.Rounded.FormatListBulleted),
+        BottomNavItem("dashboard", "Activité", Icons.Rounded.History),
         BottomNavItem("settings", "Réglages", Icons.Rounded.Settings),
     )
 
@@ -187,6 +198,9 @@ fun SentinelleApp(
             ) { backStackEntry ->
                 LookupScreen(
                     initialNumber = backStackEntry.arguments?.getString("number"),
+                    onReportNumber = { number ->
+                        navController.navigate("report?number=${android.net.Uri.encode(number)}")
+                    },
                     onOpenMyLabels = { navController.navigate("my-labels") },
                 )
             }
@@ -197,14 +211,26 @@ fun SentinelleApp(
                     },
                 )
             }
-            composable("report") {
-                ReportScreen()
+            composable(
+                "report?number={number}",
+                arguments =
+                    listOf(
+                        navArgument("number") {
+                            type = androidx.navigation.NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        },
+                    ),
+            ) { backStackEntry ->
+                ReportScreen(initialNumber = backStackEntry.arguments?.getString("number"))
             }
             composable("lists") {
                 ListsScreen()
             }
             composable("settings") {
                 SettingsScreen(
+                    onOpenFilters = { navController.navigate("lists") },
+                    onOpenReport = { navController.navigate("report") },
                     onResetApp = {
                         navController.navigate("home") {
                             popUpTo(navController.graph.findStartDestination().id) {

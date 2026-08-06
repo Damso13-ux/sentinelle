@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Bookmarks
+import androidx.compose.material.icons.rounded.Campaign
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
@@ -72,6 +73,7 @@ import com.sentinelle.app.ui.viewmodel.lookup.LookupViewModelFactory
 @Composable
 fun LookupScreen(
     initialNumber: String? = null,
+    onReportNumber: (String) -> Unit = {},
     onOpenMyLabels: () -> Unit = {},
     viewModel: LookupViewModel =
         viewModel(factory = LookupViewModelFactory(LocalContext.current)),
@@ -155,6 +157,7 @@ fun LookupScreen(
             uiState.result?.let { result ->
                 LookupResultCard(
                     result = result,
+                    onReportNumber = { onReportNumber(result.displayNumber) },
                     onSaveLabel = viewModel::saveLabel,
                     onDeleteLabel = viewModel::deleteLabel,
                     onAllowNumber = viewModel::allowNumber,
@@ -168,6 +171,7 @@ fun LookupScreen(
 @Composable
 private fun LookupResultCard(
     result: LookupResult,
+    onReportNumber: () -> Unit,
     onSaveLabel: (String, String?) -> Unit,
     onDeleteLabel: () -> Unit,
     onAllowNumber: () -> Unit,
@@ -206,6 +210,27 @@ private fun LookupResultCard(
                 onAllowNumber = onAllowNumber,
                 onRemoveFromAllowList = onRemoveFromAllowList,
             )
+
+            // Reporting from a number you actually saw blocked, rather than
+            // retyping one from memory into an empty form — this is why
+            // "Signaler" no longer needs a tab of its own.
+            Button(
+                onClick = onReportNumber,
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Campaign,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Signaler ce numéro")
+            }
         }
     }
 }
