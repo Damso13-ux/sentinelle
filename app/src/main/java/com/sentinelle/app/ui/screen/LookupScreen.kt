@@ -262,9 +262,18 @@ private fun AllowListSection(
     }
 }
 
+// FlowRow, not Row: badge text is driven by list names, which can be long
+// ("Préfixes France ARCEP de démarchage"). A Row can't wrap, so it squeezes
+// whichever badge doesn't fit down to its minimum width — which for a pill
+// containing text means one character per line, a tall vertical ribbon.
+// FlowRow moves the badge to the next line instead.
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun StatusBadges(result: LookupResult) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         result.patternMatch?.let { match ->
             val isBlocked = match.type == PatternListEntity.TYPE_BLOCK
             Badge(
