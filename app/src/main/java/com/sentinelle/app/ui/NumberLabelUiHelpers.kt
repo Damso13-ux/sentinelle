@@ -1,9 +1,9 @@
 package com.sentinelle.app.ui
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Label
 import androidx.compose.material.icons.rounded.AccountBalance
 import androidx.compose.material.icons.rounded.Campaign
-import androidx.compose.material.icons.rounded.Label
 import androidx.compose.material.icons.rounded.LocalShipping
 import androidx.compose.material.icons.rounded.ReportProblem
 import androidx.compose.material.icons.rounded.SmartToy
@@ -29,5 +29,5 @@ fun categoryIcon(category: String): ImageVector =
         NumberLabelEntity.CATEGORY_ROBOT -> Icons.Rounded.SmartToy
         NumberLabelEntity.CATEGORY_LIVRAISON -> Icons.Rounded.LocalShipping
         NumberLabelEntity.CATEGORY_BANQUE_ASSURANCE -> Icons.Rounded.AccountBalance
-        else -> Icons.Rounded.Label
+        else -> Icons.AutoMirrored.Rounded.Label
     }

@@ -45,19 +45,24 @@ val surfaceContainerHighestDark = Color(0xFF263349)
 
 // "Corail" accent variant (Pro) — same Garde neutrals, warm terracotta
 // accent instead of teal. Only the roles that swap out in Theme.kt are
-// defined here.
-val primaryDarkCorail = Color(0xFFD97B4F)
+// defined here. primary/tertiaryContainer were originally #D97B4F, which
+// only cleared 3.05:1 against white (below Garde's own 3.39:1 baseline
+// for the same role) — darkened to #AE623F (WCAG-checked at 4.55:1,
+// see ContrastCheck.java in scratch notes) without changing the hue.
+val primaryDarkCorail = Color(0xFFAE623F)
 val onPrimaryDarkCorail = Color(0xFFFFFFFF)
 val primaryContainerDarkCorail = Color(0xFF5C3420)
 val onPrimaryContainerDarkCorail = Color(0xFFF5D9C0)
 val tertiaryDarkCorail = Color(0xFFE89B72)
 val onTertiaryDarkCorail = Color(0xFF3A1D0E)
-val tertiaryContainerDarkCorail = Color(0xFFD97B4F)
+val tertiaryContainerDarkCorail = Color(0xFFAE623F)
 val onTertiaryContainerDarkCorail = Color(0xFFFFFFFF)
-val inversePrimaryDarkCorail = Color(0xFFD97B4F)
+val inversePrimaryDarkCorail = Color(0xFFAE623F)
 
 // "Violet" accent variant (Pro) — same Garde neutrals, indigo-violet
-// accent instead of teal.
+// accent instead of teal. Checked against the same WCAG bar: all four
+// role-pairs already clear 4.5:1 against white/near-black, no change
+// needed (see ContrastCheck.java in scratch notes).
 val primaryDarkViolet = Color(0xFF6D5DD3)
 val onPrimaryDarkViolet = Color(0xFFFFFFFF)
 val primaryContainerDarkViolet = Color(0xFF3A2E70)

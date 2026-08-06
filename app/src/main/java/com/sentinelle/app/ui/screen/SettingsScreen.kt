@@ -71,6 +71,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.android.billingclient.api.ProductDetails
+import com.sentinelle.app.BuildConfig
 import com.sentinelle.app.billing.BillingManager
 import com.sentinelle.app.service.ListService
 import com.sentinelle.app.ui.sheet.DebugSheet
@@ -249,6 +250,13 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
         PreferencesManager.getStoredThemeVariantFlow(context).collectAsState(initial = ThemeVariant.GARDE)
     val billingManager = remember { BillingManager(context) }
     var proProductDetails by remember { mutableStateOf<ProductDetails?>(null) }
+    // Debug-only shortcut: 3 taps on the Pro row flips the local debug
+    // unlock, same effect as the toggle in DebugSheet but without leaving
+    // this screen. Each of the first two taps still behaves like a normal
+    // tap (attempts the real purchase flow / shows "already unlocked") —
+    // only the 3rd one is intercepted. Same BuildConfig.DEBUG gate as
+    // DebugSheet's own toggle: never available in a release build.
+    var proDebugTapCount by remember { mutableIntStateOf(0) }
     DisposableEffect(Unit) {
         // Re-checks Play's purchase records on every visit to this screen,
         // not just after a purchase — a refund or a restore on a new
@@ -348,18 +356,38 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                                     "Export des stats, historique étendu, thèmes additionnels, réglages avancés de l'heuristique."
                                 },
                             icon = Icons.Rounded.WorkspacePremium,
-                            onClick = {
-                                if (proUnlocked) {
-                                    Toast.makeText(context, "Déjà débloqué — merci !", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    val activity = context as? Activity
-                                    if (activity != null) {
-                                        billingManager.launchPurchaseFlow(activity) { error ->
-                                            Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                            onClick =
+                                onProClick@{
+                                    if (BuildConfig.DEBUG) {
+                                        proDebugTapCount++
+                                        if (proDebugTapCount >= 3) {
+                                            proDebugTapCount = 0
+                                            val newValue = !proUnlocked
+                                            coroutineScope.launch { PreferencesManager.setProUnlocked(context, newValue) }
+                                            Toast
+                                                .makeText(
+                                                    context,
+                                                    if (newValue) {
+                                                        "✅ Pro simulé activé (debug uniquement)."
+                                                    } else {
+                                                        "Pro simulé désactivé (debug)."
+                                                    },
+                                                    Toast.LENGTH_SHORT,
+                                                ).show()
+                                            return@onProClick
                                         }
                                     }
-                                }
-                            },
+                                    if (proUnlocked) {
+                                        Toast.makeText(context, "Déjà débloqué — merci !", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        val activity = context as? Activity
+                                        if (activity != null) {
+                                            billingManager.launchPurchaseFlow(activity) { error ->
+                                                Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+                                },
                         ),
                     ) + if (!proUnlocked) {
                         listOf(

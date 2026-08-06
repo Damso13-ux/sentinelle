@@ -80,4 +80,80 @@ class HeuristicSpamDetectorTest {
         val result = HeuristicSpamDetector.scoreFromHistory(timestamps, now, phoneNumber = 33612345678L)
         assertEquals(result.signals.firstOrNull(), result.reason)
     }
+
+    // --- Pro-gated tuning (sensitivity / history window) ------------------
+
+    @Test
+    fun defaultSensitivityLeavesScoreUnchanged() {
+        val now = 10 * dayMillis
+        val timestamps = (1..6).map { now - it * (dayMillis / 10) }
+        val explicitDefault =
+            HeuristicSpamDetector.scoreFromHistory(
+                timestamps,
+                now,
+                phoneNumber = 33698427L,
+                sensitivity = HeuristicSettings.DEFAULT_SENSITIVITY,
+            )
+        val implicitDefault = HeuristicSpamDetector.scoreFromHistory(timestamps, now, phoneNumber = 33698427L)
+        assertEquals(implicitDefault.score, explicitDefault.score, 0.0001)
+    }
+
+    @Test
+    fun higherSensitivityRaisesScoreLowerSensitivityDropsIt() {
+        val now = 10 * dayMillis
+        // 6 calls: frequency signal fires but the raw score stays well under
+        // 1.0, so the multiplier is visible in both directions without
+        // hitting the clamp.
+        val timestamps = (1..6).map { now - it * (dayMillis / 10) }
+        val baseline = HeuristicSpamDetector.scoreFromHistory(timestamps, now, phoneNumber = 33698427L)
+        val moreSensitive =
+            HeuristicSpamDetector.scoreFromHistory(timestamps, now, phoneNumber = 33698427L, sensitivity = 1.5)
+        val lessSensitive =
+            HeuristicSpamDetector.scoreFromHistory(timestamps, now, phoneNumber = 33698427L, sensitivity = 0.5)
+
+        assertTrue(moreSensitive.score > baseline.score)
+        assertTrue(lessSensitive.score < baseline.score)
+        assertEquals(baseline.score * 1.5, moreSensitive.score, 0.0001)
+        assertEquals(baseline.score * 0.5, lessSensitive.score, 0.0001)
+    }
+
+    @Test
+    fun sensitivityCannotPushScoreAboveOne() {
+        val now = 10 * dayMillis
+        val timestamps = (1..30).map { now - it * 1_000L }
+        val result =
+            HeuristicSpamDetector.scoreFromHistory(
+                timestamps,
+                now,
+                phoneNumber = 33199999L,
+                sensitivity = HeuristicSettings.MAX_SENSITIVITY,
+            )
+        assertTrue(result.score <= 1.0)
+    }
+
+    @Test
+    fun sensitivityDoesNotInventOrRemoveSignals() {
+        // The multiplier applies to the summed score only — which signals
+        // fired is a separate decision and must not shift with sensitivity.
+        val now = 10 * dayMillis
+        val timestamps = (1..6).map { now - it * (dayMillis / 10) }
+        val low = HeuristicSpamDetector.scoreFromHistory(timestamps, now, 33698427L, sensitivity = 0.5)
+        val high = HeuristicSpamDetector.scoreFromHistory(timestamps, now, 33698427L, sensitivity = 1.5)
+        assertEquals(low.signals, high.signals)
+    }
+
+    @Test
+    fun frequencySignalReportsTheActualWindowNotAHardcodedSeven() {
+        val now = 40 * dayMillis
+        val timestamps = (1..6).map { now - it * dayMillis }
+        val result =
+            HeuristicSpamDetector.scoreFromHistory(
+                timestamps,
+                now,
+                phoneNumber = 33698427L,
+                historyWindowDays = 30,
+            )
+        assertTrue(result.signals.any { it.contains("6 appels en 30 jours") })
+        assertTrue(result.signals.none { it.contains("7 jours") })
+    }
 }

@@ -50,7 +50,7 @@ object HeuristicSpamDetector : SpamDetector {
                 .getInstance(context)
                 .callHistoryDao()
                 .getTimestampsForNumberSince(phoneNumber, now - settings.historyWindowDays * DAY_MILLIS)
-        return scoreFromHistory(timestamps, now, phoneNumber, settings.sensitivity)
+        return scoreFromHistory(timestamps, now, phoneNumber, settings.sensitivity, settings.historyWindowDays)
     }
 
     override fun scoreSms(
@@ -65,19 +65,23 @@ object HeuristicSpamDetector : SpamDetector {
                 .getInstance(context)
                 .smsHistoryDao()
                 .getTimestampsForNumberSince(phoneNumber, now - settings.historyWindowDays * DAY_MILLIS)
-        return scoreFromHistory(timestamps, now, phoneNumber, settings.sensitivity)
+        return scoreFromHistory(timestamps, now, phoneNumber, settings.sensitivity, settings.historyWindowDays)
     }
 
     // Pure scoring logic — no Android/Room dependency, so it's directly
     // unit-testable (see HeuristicSpamDetectorTest). sensitivity is a
     // Pro-gated multiplier (see HeuristicSettings) applied to the summed
     // score before clamping — 1.0 (the default) reproduces the original,
-    // untunable behavior exactly.
+    // untunable behavior exactly. historyWindowDays only affects the
+    // wording of the frequency signal (the caller has already filtered
+    // timestamps to that window); it's a parameter so a Pro user with a
+    // 30-day window doesn't get told "en 7 jours".
     fun scoreFromHistory(
         timestamps: List<Long>,
         now: Long,
         phoneNumber: Long,
         sensitivity: Double = HeuristicSettings.DEFAULT_SENSITIVITY,
+        historyWindowDays: Int = HeuristicSettings.DEFAULT_HISTORY_WINDOW_DAYS,
     ): SpamScore {
         var score = 0.0
         val signals = mutableListOf<String>()
@@ -85,7 +89,7 @@ object HeuristicSpamDetector : SpamDetector {
         val frequencyRatio = (timestamps.size / FREQUENCY_SATURATION).coerceAtMost(1.0)
         if (timestamps.size >= FREQUENCY_SIGNAL_THRESHOLD) {
             score += frequencyRatio * FREQUENCY_WEIGHT
-            signals += "${timestamps.size} appels en 7 jours"
+            signals += "${timestamps.size} appels en $historyWindowDays jours"
         }
 
         val last24h = timestamps.count { now - it <= DAY_MILLIS }

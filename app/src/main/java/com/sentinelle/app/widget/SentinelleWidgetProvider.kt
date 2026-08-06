@@ -12,6 +12,9 @@ import com.sentinelle.app.MainActivity
 import com.sentinelle.app.R
 import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.util.PermissionUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 // Plain RemoteViews (not Compose/Glance) — the standard, dependency-free
 // approach for a classic home-screen widget. Refreshed on the system's
@@ -23,7 +26,21 @@ class SentinelleWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray,
     ) {
-        appWidgetIds.forEach { id -> updateWidget(context, appWidgetManager, id) }
+        // onUpdate is a manifest-registered BroadcastReceiver callback —
+        // runs on the main thread, and the blockedEventDao().getTotalCount()
+        // read inside updateWidget is real DB I/O. goAsync() extends the
+        // receiver's lifetime so that read can move to Dispatchers.IO
+        // instead of blocking here, same pattern as UnblockActionReceiver.
+        // Only one goAsync() per onReceive/onUpdate call, so this wraps the
+        // whole batch of widget ids rather than one per id.
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                appWidgetIds.forEach { id -> updateWidget(context, appWidgetManager, id) }
+            } finally {
+                pendingResult.finish()
+            }
+        }
     }
 
     companion object {
@@ -50,13 +67,21 @@ class SentinelleWidgetProvider : AppWidgetProvider() {
                 false
             }
 
+        /**
+         * Called from BlockEventLogger right after logging a block — in
+         * practice that's always already off the main thread (inside a
+         * screening/notification coroutine), but dispatching to IO here too
+         * means this stays safe even if a future caller isn't.
+         */
         fun requestUpdate(context: Context) {
-            try {
-                val manager = AppWidgetManager.getInstance(context)
-                val ids = manager.getAppWidgetIds(ComponentName(context, SentinelleWidgetProvider::class.java))
-                ids.forEach { id -> updateWidget(context, manager, id) }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error requesting widget update", e)
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val manager = AppWidgetManager.getInstance(context)
+                    val ids = manager.getAppWidgetIds(ComponentName(context, SentinelleWidgetProvider::class.java))
+                    ids.forEach { id -> updateWidget(context, manager, id) }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error requesting widget update", e)
+                }
             }
         }
 
