@@ -22,6 +22,40 @@ Sentinelle est une application Android de blocage d'appels/SMS utilisant l'API `
 - Lancer `make lint` après chaque modification de code
 - Ne pas commit
 
+## Signature et clés
+
+Deux clés distinctes, à ne pas confondre.
+
+**Clé de release.** Renseignée via `keystore.properties` à la racine du
+dépôt (gitignoré), qui pointe vers un fichier `.jks` conservé en dehors du
+dépôt :
+
+```properties
+storeFile=/chemin/absolu/vers/sentinelle-release.jks
+storePassword=…
+keyAlias=…
+keyPassword=…
+```
+
+Sans ce fichier, `assembleRelease` produit un APK **non signé**, donc
+non installable. Pour tester un build release minifié sur une machine qui
+n'a pas la clé, utiliser `-PuseDebugSigningForRelease` (voir
+`app/build.gradle.kts`) : l'APK est alors signé avec la clé de debug,
+installable, mais rejeté par Play.
+
+**Clé de debug.** Générée automatiquement dans `~/.android/debug.keystore`,
+**propre à chaque machine**. Conséquence concrète en travaillant sur
+plusieurs postes : un APK construit sur la machine A ne peut pas se
+mettre à jour par-dessus une installation venant de la machine B — Android
+voit deux certificats différents pour le même `applicationId` et refuse.
+Il faut désinstaller, ce qui **efface toutes les données locales** (base
+Room, DataStore : historique des blocages, labels, réglages, historique
+qui alimente l'heuristique).
+
+Pour éviter ça, copier `~/.android/debug.keystore` d'une machine vers
+l'autre une bonne fois — les deux postes signent alors à l'identique et
+les mises à jour passent sans désinstallation.
+
 ## Tests
 
 La plupart des tests sont du JVM pur : la logique testable est isolée dans
