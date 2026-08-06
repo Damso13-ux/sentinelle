@@ -57,7 +57,7 @@ class CallScreeningService : CallScreeningService() {
         }
 
         val rawPhoneNumber = callDetails.handle?.schemeSpecificPart
-        Log.d(TAG, "Incoming call from: $rawPhoneNumber")
+        Log.d(TAG, "Screening an incoming call")
 
         val countryPrefixes =
             runBlocking {
@@ -81,7 +81,7 @@ class CallScreeningService : CallScreeningService() {
             val action = PatternManager.evaluateCall(phoneNumber, countryPrefixes, this)
             if (action is CallAction.Allow) {
                 allowedPatternName = action.pattern.name
-                Log.d(TAG, "Allow list match: ${action.pattern.name} for $rawPhoneNumber")
+                Log.d(TAG, "Allow list match: ${action.pattern.name}")
             } else if (action is CallAction.Block) {
                 blockSource = action.source
             } else {
@@ -143,7 +143,7 @@ class CallScreeningService : CallScreeningService() {
         }
 
         if (blockSource != null) {
-            Log.d(TAG, "Blocking call from: $rawPhoneNumber")
+            Log.d(TAG, "Blocking call")
             respondToCall(
                 callDetails,
                 CallResponse
@@ -190,7 +190,7 @@ class CallScreeningService : CallScreeningService() {
                 NotificationService.sendBlockedCallNotification(this, rawPhoneNumber ?: "", label, phoneNumber)
             }
         } else {
-            Log.d(TAG, "Allowing call from: $rawPhoneNumber")
+            Log.d(TAG, "Allowing call")
             respondToCall(callDetails, CallResponse.Builder().build())
             if (allowedPatternName != null) {
                 NotificationService.sendAllowedCallNotification(this, rawPhoneNumber ?: "", allowedPatternName)

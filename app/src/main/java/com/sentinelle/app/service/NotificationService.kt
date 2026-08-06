@@ -54,7 +54,7 @@ object NotificationService {
         label: String? = null,
         normalizedPhoneNumber: Long? = null,
     ) {
-        Log.d(TAG, "Sending notification for blocked call from: $phoneNumber")
+        Log.d(TAG, "Sending blocked-call notification")
 
         val notificationId = "$phoneNumber-${System.currentTimeMillis()}".hashCode()
         val contentText = if (label != null) "$label · $phoneNumber" else phoneNumber
@@ -122,7 +122,7 @@ object NotificationService {
         context: Context,
         phoneNumber: String,
     ) {
-        Log.d(TAG, "Sending notification for blocked SMS from: $phoneNumber")
+        Log.d(TAG, "Sending blocked-SMS notification")
 
         val notificationId = "sms-$phoneNumber-${System.currentTimeMillis()}".hashCode()
 
@@ -143,7 +143,7 @@ object NotificationService {
         phoneNumber: String,
         patternName: String,
     ) {
-        Log.d(TAG, "Sending notification for identified call: $phoneNumber ($patternName)")
+        Log.d(TAG, "Sending identified-call notification ($patternName)")
 
         val notificationId = "allowed-$phoneNumber-${System.currentTimeMillis()}".hashCode()
 

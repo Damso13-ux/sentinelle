@@ -47,14 +47,12 @@ class SmsNotificationListener : NotificationListenerService() {
 
         val extras = sbn.notification.extras ?: return
 
-        val peopleUriList = BundleCompat.getParcelableArrayList(extras, "android.people.list", Person::class.java)?.map { it.uri }
-        Log.d(
-            TAG,
-            "SMS notification extras: title=${extras.getString(
-                "android.title",
-            )}, text=${extras.getString("android.text")}, people=$peopleUriList",
-        )
-
+        // Deliberately no logging of the notification extras here. They
+        // carry the message body, the sender's display name and contact
+        // URIs, and this runs for every incoming SMS — dumping that into
+        // logcat contradicts the whole point of processing messages
+        // on-device only. Sender extraction is exercised by
+        // SmsNumberExtractorTest instead of by reading logs.
         val peopleList =
             BundleCompat
                 .getParcelableArrayList(extras, "android.people.list", Person::class.java)
@@ -83,8 +81,6 @@ class SmsNotificationListener : NotificationListenerService() {
             Log.w(TAG, "Could not extract sender number or message text from notification extras")
             return
         }
-
-        Log.d(TAG, "SMS notification from: ${senderNumber ?: "unknown sender"} (package: ${sbn.packageName})")
 
         val notificationKey = sbn.key
 
@@ -128,12 +124,12 @@ class SmsNotificationListener : NotificationListenerService() {
                 }
 
                 if (action is SmsAction.Hide) {
-                    Log.d(
-                        TAG,
-                        "Masquage de la notification de SMS indésirable depuis : " +
-                            "${senderNumber ?: "expéditeur inconnu"} " +
-                            "(le SMS n'est pas bloqué, seule la notification est masquée)",
-                    )
+                    // Only the notification is hidden — the SMS itself stays
+                    // in the messaging app, since Sentinelle isn't the
+                    // default SMS handler. Sender omitted from the log on
+                    // purpose; the blocked event is recorded in the DB below
+                    // and visible in the dashboard.
+                    Log.d(TAG, "Hiding notification for a filtered SMS")
                     cancelNotification(notificationKey)
 
                     try {

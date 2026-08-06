@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +55,8 @@ import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.data.PatternListEntity
 import com.sentinelle.app.data.PatternListItemEntity
 import com.sentinelle.app.service.PatternService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.sentinelle.app.ui.formatVersionDate
 import com.sentinelle.app.ui.getChannelIcon
 import com.sentinelle.app.ui.getChannelLabel
@@ -66,6 +69,16 @@ import java.util.Locale
 
 private const val PAGE_SIZE = 500
 private const val LOAD_MORE_THRESHOLD = 20
+
+private sealed interface PatternListLoadState {
+    data object Loading : PatternListLoadState
+
+    data object NotFound : PatternListLoadState
+
+    data class Ready(
+        val list: PatternListEntity,
+    ) : PatternListLoadState
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,15 +94,23 @@ fun PatternListSheet(
     var detailPatternId by remember { mutableStateOf<Long?>(null) }
 
     val db = AppDatabase.getInstance(context)
-    val list =
-        remember(refreshKey) {
-            db.patternListDao().getById(listId)
-        }
+    // Off the main thread, and "still loading" kept distinct from "gone" —
+    // treating both as null would dismiss the sheet before the query
+    // returned. Loading stays blank rather than flashing a spinner: the
+    // lookup is by primary key and returns in a frame or two.
+    val listState by produceState<PatternListLoadState>(PatternListLoadState.Loading, listId, refreshKey) {
+        value =
+            withContext(Dispatchers.IO) {
+                db.patternListDao().getById(listId)?.let { PatternListLoadState.Ready(it) }
+                    ?: PatternListLoadState.NotFound
+            }
+    }
 
-    if (list == null) {
-        onDismiss()
+    if (listState is PatternListLoadState.NotFound) {
+        LaunchedEffect(Unit) { onDismiss() }
         return
     }
+    val list = (listState as? PatternListLoadState.Ready)?.list ?: return
 
     val isUser = list.source == PatternListEntity.SOURCE_USER
     val lazyListState = rememberLazyListState()
@@ -99,8 +120,15 @@ fun PatternListSheet(
     var hasMore by remember { mutableStateOf(false) }
 
     LaunchedEffect(listId, refreshKey) {
-        patterns = db.patternListItemDao().getPatternsByListIdPaged(listId, PAGE_SIZE, 0)
-        totalCount = db.patternListItemDao().getCountByListId(listId)
+        // LaunchedEffect runs on the composition's context (Main) — the
+        // paging queries have to be moved to IO explicitly.
+        val page =
+            withContext(Dispatchers.IO) {
+                val rows = db.patternListItemDao().getPatternsByListIdPaged(listId, PAGE_SIZE, 0)
+                rows to db.patternListItemDao().getCountByListId(listId)
+            }
+        patterns = page.first
+        totalCount = page.second
         hasMore = patterns.size < totalCount
         lazyListState.scrollToItem(0)
     }
@@ -112,7 +140,10 @@ fun PatternListSheet(
                 ?.index ?: -1
         }.collect { lastVisibleIndex ->
             if (hasMore && lastVisibleIndex >= 0 && lastVisibleIndex >= patterns.size - LOAD_MORE_THRESHOLD) {
-                val more = db.patternListItemDao().getPatternsByListIdPaged(listId, PAGE_SIZE, patterns.size)
+                val more =
+                    withContext(Dispatchers.IO) {
+                        db.patternListItemDao().getPatternsByListIdPaged(listId, PAGE_SIZE, patterns.size)
+                    }
                 patterns = patterns + more
                 hasMore = patterns.size < totalCount
             }

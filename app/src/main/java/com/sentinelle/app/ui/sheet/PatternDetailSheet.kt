@@ -31,8 +31,10 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,14 +47,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.data.PatternListEntity
+import com.sentinelle.app.data.PatternListItemEntity
 import com.sentinelle.app.service.PatternService
 import com.sentinelle.app.ui.getTypeActionLabel
 import com.sentinelle.app.ui.getTypeColor
 import com.sentinelle.app.ui.getTypeIcon
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.DateFormat
 import java.text.NumberFormat
 import java.util.Date
 import java.util.Locale
+
+private sealed interface PatternDetailState {
+    data object Loading : PatternDetailState
+
+    data object NotFound : PatternDetailState
+
+    data class Ready(
+        val item: PatternListItemEntity,
+        val list: PatternListEntity,
+    ) : PatternDetailState
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,25 +80,31 @@ fun PatternDetailSheet(
     val context = LocalContext.current
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    val pattern =
-        remember {
-            AppDatabase.getInstance(context).patternListItemDao().getPatternById(patternId)
-        }
-
-    if (pattern == null) {
-        onDismiss()
-        return
+    // Read off the main thread. "Loading" and "not found" must stay
+    // distinct states: this sheet dismisses itself when the row is gone,
+    // and a plain nullable would make it dismiss on every open, before the
+    // query had a chance to return.
+    val state by produceState<PatternDetailState>(PatternDetailState.Loading, patternId) {
+        value =
+            withContext(Dispatchers.IO) {
+                val db = AppDatabase.getInstance(context)
+                val item = db.patternListItemDao().getPatternById(patternId)
+                val list = item?.let { db.patternListDao().getById(it.listId) }
+                if (item != null && list != null) {
+                    PatternDetailState.Ready(item, list)
+                } else {
+                    PatternDetailState.NotFound
+                }
+            }
     }
 
-    val parentList =
-        remember {
-            AppDatabase.getInstance(context).patternListDao().getById(pattern.listId)
-        }
-
-    if (parentList == null) {
-        onDismiss()
+    if (state is PatternDetailState.NotFound) {
+        LaunchedEffect(Unit) { onDismiss() }
         return
     }
+    val ready = state as? PatternDetailState.Ready ?: return
+    val pattern = ready.item
+    val parentList = ready.list
 
     // Driven by the parent list's channel rather than sniffing the pattern
     // text — a keyword like "100% gratuit" starts with a digit too.

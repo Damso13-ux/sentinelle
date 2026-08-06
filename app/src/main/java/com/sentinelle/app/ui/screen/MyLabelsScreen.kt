@@ -1,6 +1,5 @@
 package com.sentinelle.app.ui.screen
 
-import android.telephony.PhoneNumberUtils
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,6 +42,7 @@ import com.sentinelle.app.data.NumberLabelEntity
 import com.sentinelle.app.ui.NUMBER_LABEL_CATEGORIES
 import com.sentinelle.app.ui.categoryIcon
 import com.sentinelle.app.ui.categoryLabel
+import com.sentinelle.app.ui.formatPhoneNumberForDisplay
 import com.sentinelle.app.ui.viewmodel.labels.MyLabelsViewModel
 import com.sentinelle.app.ui.viewmodel.labels.MyLabelsViewModelFactory
 import java.text.DateFormat
@@ -115,7 +115,7 @@ fun MyLabelsScreen(
                     items(filteredLabels, key = { it.phoneNumber }) { label ->
                         LabelRow(
                             label = label,
-                            onClick = { onOpenNumber(formatPhoneNumber(label.phoneNumber)) },
+                            onClick = { onOpenNumber(formatPhoneNumberForDisplay(label.phoneNumber)) },
                             onDelete = { viewModel.deleteLabel(label.phoneNumber) },
                         )
                     }
@@ -147,7 +147,7 @@ private fun LabelRow(
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = formatPhoneNumber(label.phoneNumber),
+                    text = formatPhoneNumberForDisplay(label.phoneNumber),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -177,5 +177,3 @@ private fun LabelRow(
     }
 }
 
-private fun formatPhoneNumber(number: Long): String =
-    PhoneNumberUtils.formatNumberToE164(number.toString(), "FR") ?: number.toString()

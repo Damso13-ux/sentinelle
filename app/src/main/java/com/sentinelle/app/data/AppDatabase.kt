@@ -10,7 +10,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [
         PatternListItemEntity::class,
-        BlockedCallEntity::class,
         PatternListEntity::class,
         BlockedEventEntity::class,
         CallHistoryEntity::class,
@@ -18,15 +17,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         SmsHistoryEntity::class,
         HeuristicShadowEventEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun patternListItemDao(): PatternListItemDao
-
-    // Deprecated: superseded by blockedEventDao(), kept only for the pre-existing
-    // rows migrated into blocked_events. Do not write new rows here.
-    abstract fun blockedCallDao(): BlockedCallDao
 
     abstract fun patternListDao(): PatternListDao
 
@@ -264,13 +259,24 @@ abstract class AppDatabase : RoomDatabase() {
                 }
             }
 
+        // blocked_calls was superseded by blocked_events back in MIGRATION_2_3,
+        // which copied every row across. It has had no reader or writer since,
+        // so this only drops storage that was already dead — the history it
+        // held is still in blocked_events and stays visible in the dashboard.
+        private val MIGRATION_6_7 =
+            object : Migration(6, 7) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("DROP TABLE IF EXISTS blocked_calls")
+                }
+            }
+
         private fun buildDatabase(context: Context): AppDatabase =
             Room
                 .databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "sentinelle.db",
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                 .fallbackToDestructiveMigration(false)
                 .allowMainThreadQueries()
                 .build()

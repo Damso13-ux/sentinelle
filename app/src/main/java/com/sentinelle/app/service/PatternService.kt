@@ -124,8 +124,16 @@ object PatternService {
         if (trimmed.isEmpty()) {
             return PatternValidation.Invalid("Le mot-clé ne peut pas être vide.")
         }
-        if (trimmed.length < 2) {
-            return PatternValidation.Invalid("Le mot-clé est trop court (minimum 2 caractères).")
+        // Keywords match as a case-insensitive substring anywhere in the
+        // message, so very short ones are indiscriminate: "ur" alone would
+        // hide any SMS containing "bonjour". Four characters is the point
+        // where a keyword starts describing an actual word rather than a
+        // fragment that appears everywhere.
+        if (trimmed.length < 4) {
+            return PatternValidation.Invalid(
+                "Le mot-clé est trop court (minimum 4 caractères). " +
+                    "Un mot-clé court risque de masquer des messages légitimes.",
+            )
         }
         if (trimmed.length > 100) {
             return PatternValidation.Invalid("Le mot-clé est trop long (maximum 100 caractères).")

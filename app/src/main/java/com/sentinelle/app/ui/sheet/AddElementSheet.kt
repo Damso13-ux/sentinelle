@@ -153,8 +153,11 @@ fun AddElementSheet(
                         {
                             Text(
                                 text =
-                                    "Le SMS sera masqué s'il contient ce mot ou cette phrase " +
-                                        "(insensible à la casse). Exemple : « gagné ».",
+                                    "Le SMS sera masqué s'il contient cette suite de caractères " +
+                                        "n'importe où dans le message, même au milieu d'un mot " +
+                                        "(insensible à la casse). « gagné » masquerait aussi " +
+                                        "« regagné » — privilégiez un mot ou une phrase " +
+                                        "caractéristique.",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }

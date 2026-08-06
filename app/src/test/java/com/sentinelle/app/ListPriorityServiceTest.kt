@@ -132,6 +132,49 @@ class ListPriorityServiceTest {
         assertEquals(listOf(1L, 2L), sorted.map { it.id })
     }
 
+    /**
+     * `priority` arrives from the API as a nullable Int with no floor. When
+     * it was the primary sort key, a negative value on a downloaded block
+     * list would have been evaluated before the user's own allow list —
+     * silently overriding an explicit "Ne jamais bloquer ce numéro".
+     */
+    @Test
+    fun userAllowStillWinsAgainstANegativeApiPriority() {
+        val lists =
+            listOf(
+                list(1, priority = -999, type = PatternListEntity.TYPE_BLOCK, source = PatternListEntity.SOURCE_API),
+                list(
+                    PatternListEntity.USER_ALLOW_LIST_ID,
+                    name = "user allow",
+                    priority = 0,
+                    type = PatternListEntity.TYPE_ALLOW,
+                    source = PatternListEntity.SOURCE_USER,
+                ),
+            )
+
+        val sorted = ListPriorityService.sortListsByPriority(lists)
+
+        assertEquals(PatternListEntity.USER_ALLOW_LIST_ID, sorted.first().id)
+    }
+
+    @Test
+    fun everyUserListIsEvaluatedBeforeAnyDownloadedList() {
+        val lists =
+            listOf(
+                list(1, priority = -50, source = PatternListEntity.SOURCE_API),
+                list(PatternListEntity.USER_BLOCK_LIST_ID, name = "user block", priority = 0, type = PatternListEntity.TYPE_BLOCK, source = PatternListEntity.SOURCE_USER),
+                list(2, priority = 0, type = PatternListEntity.TYPE_ALLOW, source = PatternListEntity.SOURCE_API),
+                list(PatternListEntity.USER_ALLOW_LIST_ID, name = "user allow", priority = 0, type = PatternListEntity.TYPE_ALLOW, source = PatternListEntity.SOURCE_USER),
+            )
+
+        val sorted = ListPriorityService.sortListsByPriority(lists)
+
+        assertEquals(
+            listOf(PatternListEntity.USER_ALLOW_LIST_ID, PatternListEntity.USER_BLOCK_LIST_ID),
+            sorted.take(2).map { it.id },
+        )
+    }
+
     @Test
     fun emptyInputReturnsEmpty() {
         assertTrue(ListPriorityService.sortListsByPriority(emptyList()).isEmpty())

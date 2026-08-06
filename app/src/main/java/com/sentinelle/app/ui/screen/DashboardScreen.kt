@@ -1,6 +1,5 @@
 package com.sentinelle.app.ui.screen
 
-import android.telephony.PhoneNumberUtils
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -60,6 +59,7 @@ import com.sentinelle.app.data.DayCount
 import com.sentinelle.app.data.HeuristicShadowEventEntity
 import com.sentinelle.app.data.PatternListEntity
 import com.sentinelle.app.ui.formatBlockReason
+import com.sentinelle.app.ui.formatPhoneNumberForDisplay
 import com.sentinelle.app.ui.viewmodel.dashboard.DashboardViewModel
 import java.text.DateFormat
 import java.util.Locale
@@ -343,7 +343,7 @@ private fun TopNumbersCard(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = formatPhoneNumber(entry.phoneNumber),
+                                text = formatPhoneNumberForDisplay(entry.phoneNumber),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
@@ -435,7 +435,7 @@ private fun RecentEventRow(
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = if (event.phoneNumber == 0L) "Numéro masqué" else formatPhoneNumber(event.phoneNumber),
+                text = if (event.phoneNumber == 0L) "Numéro masqué" else formatPhoneNumberForDisplay(event.phoneNumber),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -502,7 +502,7 @@ private fun ShadowEventRow(event: HeuristicShadowEventEntity) {
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = formatPhoneNumber(event.phoneNumber),
+                text = formatPhoneNumberForDisplay(event.phoneNumber),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -520,5 +520,3 @@ private fun ShadowEventRow(event: HeuristicShadowEventEntity) {
     }
 }
 
-private fun formatPhoneNumber(number: Long): String =
-    PhoneNumberUtils.formatNumberToE164(number.toString(), "FR") ?: number.toString()
