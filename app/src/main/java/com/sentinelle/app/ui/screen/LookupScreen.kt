@@ -6,12 +6,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -23,6 +26,7 @@ import androidx.compose.material.icons.rounded.Bookmarks
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.RemoveCircleOutline
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material3.Button
@@ -153,6 +157,8 @@ fun LookupScreen(
                     result = result,
                     onSaveLabel = viewModel::saveLabel,
                     onDeleteLabel = viewModel::deleteLabel,
+                    onAllowNumber = viewModel::allowNumber,
+                    onRemoveFromAllowList = viewModel::removeFromAllowList,
                 )
             }
         }
@@ -164,6 +170,8 @@ private fun LookupResultCard(
     result: LookupResult,
     onSaveLabel: (String, String?) -> Unit,
     onDeleteLabel: () -> Unit,
+    onAllowNumber: () -> Unit,
+    onRemoveFromAllowList: () -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -192,6 +200,64 @@ private fun LookupResultCard(
                 onSaveLabel = onSaveLabel,
                 onDeleteLabel = onDeleteLabel,
             )
+
+            AllowListSection(
+                isAllowed = result.allowListItemId != null,
+                onAllowNumber = onAllowNumber,
+                onRemoveFromAllowList = onRemoveFromAllowList,
+            )
+        }
+    }
+}
+
+// The escape hatch for a false positive noticed after the fact — the
+// "Ce n'est pas un spam" notification action is gone once the notification
+// is dismissed, and before this the only recourse was retyping the number
+// by hand in Listes.
+@Composable
+private fun AllowListSection(
+    isAllowed: Boolean,
+    onAllowNumber: () -> Unit,
+    onRemoveFromAllowList: () -> Unit,
+) {
+    if (isAllowed) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = "Ce numéro est dans vos numéros autorisés — il ne sera jamais bloqué.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Button(
+                onClick = onRemoveFromAllowList,
+                modifier = Modifier.fillMaxWidth(),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        contentColor = MaterialTheme.colorScheme.onSurface,
+                    ),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.RemoveCircleOutline,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Retirer des numéros autorisés")
+            }
+        }
+    } else {
+        Button(
+            onClick = onAllowNumber,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Ne jamais bloquer ce numéro")
         }
     }
 }

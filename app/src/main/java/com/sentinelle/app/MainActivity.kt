@@ -167,7 +167,11 @@ fun SentinelleApp(
                 )
             }
             composable("dashboard") {
-                DashboardScreen()
+                DashboardScreen(
+                    onOpenNumber = { phoneNumber ->
+                        navController.navigate("lookup?number=${android.net.Uri.encode("+$phoneNumber")}")
+                    },
+                )
             }
             composable(
                 "lookup?number={number}",

@@ -5,6 +5,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.FileDownload
 import androidx.compose.material.icons.rounded.Phone
@@ -73,6 +75,10 @@ import kotlinx.coroutines.withContext
 @Preview
 @Composable
 fun DashboardScreen(
+    // Opens the lookup screen for a blocked number, where it can be
+    // allowed, labelled or inspected. Defaults to a no-op so the @Preview
+    // above still builds without a NavController.
+    onOpenNumber: (Long) -> Unit = {},
     viewModel: DashboardViewModel =
         viewModel(
             factory = DashboardViewModelFactory(LocalContext.current),
@@ -144,8 +150,8 @@ fun DashboardScreen(
             RangeSelector(selected = uiState.selectedRange, onSelect = viewModel::setRange)
             SummaryRow(total = uiState.totalBlocked, calls = uiState.blockedCalls, sms = uiState.blockedSms)
             TrendCard(dailyTrend = uiState.dailyTrend)
-            TopNumbersCard(topBlockedNumbers = uiState.topBlockedNumbers)
-            RecentEventsCard(events = uiState.recentEvents)
+            TopNumbersCard(topBlockedNumbers = uiState.topBlockedNumbers, onOpenNumber = onOpenNumber)
+            RecentEventsCard(events = uiState.recentEvents, onOpenNumber = onOpenNumber)
             if (uiState.shadowEvents.isNotEmpty()) {
                 ShadowEventsCard(events = uiState.shadowEvents)
             }
@@ -303,7 +309,10 @@ private fun BarChart(dailyTrend: List<DayCount>) {
 }
 
 @Composable
-private fun TopNumbersCard(topBlockedNumbers: List<TopBlockedNumberDisplay>) {
+private fun TopNumbersCard(
+    topBlockedNumbers: List<TopBlockedNumberDisplay>,
+    onOpenNumber: (Long) -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
@@ -324,11 +333,15 @@ private fun TopNumbersCard(topBlockedNumbers: List<TopBlockedNumberDisplay>) {
             } else {
                 topBlockedNumbers.forEach { entry ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onOpenNumber(entry.phoneNumber) }
+                                .padding(vertical = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = formatPhoneNumber(entry.phoneNumber),
                                 style = MaterialTheme.typography.bodyMedium,
@@ -348,6 +361,12 @@ private fun TopNumbersCard(topBlockedNumbers: List<TopBlockedNumberDisplay>) {
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.tertiary,
                         )
+                        Icon(
+                            imageVector = Icons.Rounded.ChevronRight,
+                            contentDescription = "Voir les détails du numéro",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp),
+                        )
                     }
                 }
             }
@@ -356,7 +375,10 @@ private fun TopNumbersCard(topBlockedNumbers: List<TopBlockedNumberDisplay>) {
 }
 
 @Composable
-private fun RecentEventsCard(events: List<BlockedEventEntity>) {
+private fun RecentEventsCard(
+    events: List<BlockedEventEntity>,
+    onOpenNumber: (Long) -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
@@ -376,18 +398,32 @@ private fun RecentEventsCard(events: List<BlockedEventEntity>) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             } else {
-                events.forEach { event -> RecentEventRow(event) }
+                events.forEach { event -> RecentEventRow(event, onOpenNumber) }
             }
         }
     }
 }
 
 @Composable
-private fun RecentEventRow(event: BlockedEventEntity) {
+private fun RecentEventRow(
+    event: BlockedEventEntity,
+    onOpenNumber: (Long) -> Unit,
+) {
     val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, Locale.FRANCE) }
+    // A withheld number (0L) has nothing to look up or allow.
+    val isActionable = event.phoneNumber != 0L
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .then(
+                    if (isActionable) {
+                        Modifier.clickable { onOpenNumber(event.phoneNumber) }
+                    } else {
+                        Modifier
+                    },
+                ).padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -414,6 +450,14 @@ private fun RecentEventRow(event: BlockedEventEntity) {
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
+        if (isActionable) {
+            Icon(
+                imageVector = Icons.Rounded.ChevronRight,
+                contentDescription = "Voir les détails du numéro",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
+        }
     }
 }
 

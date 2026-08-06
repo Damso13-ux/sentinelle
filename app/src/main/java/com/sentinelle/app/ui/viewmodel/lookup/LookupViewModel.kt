@@ -7,7 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.sentinelle.app.arcep.ArcepNpvPrefixes
 import com.sentinelle.app.data.AppDatabase
 import com.sentinelle.app.data.NumberLabelEntity
+import com.sentinelle.app.data.PatternListEntity
 import com.sentinelle.app.service.ListPriorityService
+import com.sentinelle.app.service.PatternService
 import com.sentinelle.app.util.PhoneNumberMatcher
 import com.sentinelle.app.util.PreferencesManager
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +31,10 @@ data class LookupResult(
     val isArcepNpv: Boolean,
     val blockedCount: Int,
     val label: NumberLabelEntity?,
+    // Id of this number's entry in the personal allow list, or null if it
+    // isn't allowed. Doubles as the "is allowed?" flag and as the handle
+    // needed to remove it again.
+    val allowListItemId: Long? = null,
 )
 
 data class LookupUiState(
@@ -96,6 +102,41 @@ class LookupViewModel(
         }
     }
 
+    /**
+     * Adds the number to the personal allow list, which is checked before
+     * every block list and before the heuristic — so this takes effect on
+     * the next call, without touching the block lists themselves.
+     *
+     * This is the false-positive escape hatch for a number spotted after
+     * the fact: the "Ce n'est pas un spam" notification action only exists
+     * while the notification is still there.
+     */
+    fun allowNumber() {
+        val result = _uiState.value.result ?: return
+        if (result.allowListItemId != null) return
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                PatternService.addUserPattern(
+                    pattern = "+${result.phoneNumber}",
+                    name = "Autorisé depuis la recherche",
+                    listId = PatternListEntity.USER_ALLOW_LIST_ID,
+                    context = context,
+                )
+            }
+            search()
+        }
+    }
+
+    fun removeFromAllowList() {
+        val itemId = _uiState.value.result?.allowListItemId ?: return
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                PatternService.deletePattern(itemId, context)
+            }
+            search()
+        }
+    }
+
     private suspend fun buildResult(raw: String): LookupResult? {
         if (raw.isBlank()) return null
         val prefixes = PreferencesManager.getCountryPrefixes(context)
@@ -108,6 +149,17 @@ class LookupViewModel(
         val isArcepNpv = ArcepNpvPrefixes.isNpvNumber(phoneNumber)
         val blockedCount = db.blockedEventDao().getCountForNumber(phoneNumber)
         val label = db.numberLabelDao().getByPhoneNumber(phoneNumber)
+        // Match on the variants rather than the raw number: the allow-list
+        // entry may have been stored in a different notation (national vs.
+        // international) depending on where it was added from.
+        val variants = PhoneNumberMatcher.generateVariants(phoneNumber, prefixes)
+        val allowListItemId =
+            db
+                .patternListItemDao()
+                .getPatternsByListId(PatternListEntity.USER_ALLOW_LIST_ID)
+                .firstOrNull { item ->
+                    variants.any { PhoneNumberMatcher.matchesPattern(it, item.pattern) }
+                }?.id
 
         return LookupResult(
             phoneNumber = phoneNumber,
@@ -116,6 +168,7 @@ class LookupViewModel(
             isArcepNpv = isArcepNpv,
             blockedCount = blockedCount,
             label = label,
+            allowListItemId = allowListItemId,
         )
     }
 
