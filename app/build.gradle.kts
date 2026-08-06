@@ -38,8 +38,8 @@ if (keystorePropertiesFile.exists()) {
 // Deliberately not derived from `git rev-list --count`: the CI checkout is
 // shallow, which would collapse the count to 1, and this repo's history
 // has been lost once already.
-val appVersionCode = 1
-val appVersionName = "1.0.0-alpha01"
+val appVersionCode = 2
+val appVersionName = "1.0.0-alpha02"
 
 android {
     namespace = "com.sentinelle.app"
@@ -76,9 +76,25 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            if (keystorePropertiesFile.exists()) {
-                signingConfig = signingConfigs.getByName("release")
-            }
+            signingConfig =
+                when {
+                    keystorePropertiesFile.exists() -> signingConfigs.getByName("release")
+
+                    // An unsigned release APK can't be installed, which makes
+                    // it useless for the one thing a local release build is
+                    // for: checking that R8 and the ProGuard rules didn't
+                    // break anything at runtime. On a machine without the
+                    // signing key, `-PuseDebugSigningForRelease` produces a
+                    // fully minified, installable release build instead.
+                    //
+                    // Opt-in on purpose, never a silent fallback: the result
+                    // is signed with the debug key and Play will reject it.
+                    // It is for on-device testing only.
+                    project.hasProperty("useDebugSigningForRelease") ->
+                        signingConfigs.getByName("debug")
+
+                    else -> null
+                }
         }
         debug {
             isDebuggable = true
