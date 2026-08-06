@@ -74,6 +74,32 @@ l'application" wipes everything on-device immediately.
 - Feature graphic `metadata/{en-US,fr-FR}/images/featureGraphic.png` (1024×500) — generated, Play-ready ✅
 - Screenshots (`metadata/*/images/phoneScreenshots/1-5.jpg`) — real captures from the current build: Accueil, Statistiques, Signaler, Listes, Réglages ✅
 
+## Versioning
+
+Both numbers live at the top of `app/build.gradle.kts` (`appVersionCode` /
+`appVersionName`).
+
+**Before every upload**, bump `appVersionCode` by 1. No exceptions — Play
+rejects a reused value, and it can never be lowered afterwards. It's
+invisible to users; it exists purely so Play knows which build is newer.
+
+`appVersionName` is the string users see. Move it when the *content*
+changes meaningfully, not on every upload:
+
+| Phase | versionName | Play track |
+|---|---|---|
+| First internal builds | `1.0.0-alpha01`, `-alpha02`, … | Internal testing |
+| Mandatory closed test (~12 testers / ~14 days) | `1.0.0-beta01`, `-beta02`, … | Closed testing |
+| Public launch | `1.0.0` | Production |
+| Bug fixes after launch | `1.0.1`, `1.0.2` | Production |
+| New features | `1.1.0` | Production |
+| Breaking change / redesign | `2.0.0` | Production |
+
+The suffix is documentation, not a mechanism: who actually receives a
+build is decided by the Play Console track it's uploaded to. Keeping the
+two aligned just avoids confusion about which build a tester is running —
+worth it, since testers report bugs by version name.
+
 ## In-app purchase ("Sentinelle Pro") — Play Console setup
 
 Client-side plumbing is done (`BillingManager`, gated features, price display,

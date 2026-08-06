@@ -17,6 +17,30 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
 
+// --- Versioning -------------------------------------------------------
+//
+// Two independent numbers, don't conflate them:
+//
+// appVersionCode is Play's internal ordering key. Never shown to users.
+// Must strictly increase on EVERY upload and can never be reused or
+// lowered — Play rejects the upload outright. Bump it by 1 for each build
+// sent to any track, even a throwaway one. Several uploads can share a
+// versionName (successive alpha builds of 1.0.0) but never a versionCode.
+//
+// appVersionName is the human-readable string shown in the store listing
+// and in Réglages. SemVer with an optional pre-release suffix:
+//   1.0.0-alpha01 → 1.0.0-alpha02 → 1.0.0-beta01 → 1.0.0 → 1.0.1 → 1.1.0
+// The suffix is documentation, not a mechanism: what actually decides who
+// gets a build is the Play Console track it's uploaded to (Internal /
+// Closed / Open / Production). Keeping the two aligned just avoids
+// confusion about which build a tester is on.
+//
+// Deliberately not derived from `git rev-list --count`: the CI checkout is
+// shallow, which would collapse the count to 1, and this repo's history
+// has been lost once already.
+val appVersionCode = 1
+val appVersionName = "1.0.0-alpha01"
+
 android {
     namespace = "com.sentinelle.app"
     compileSdk = 37
@@ -27,10 +51,11 @@ android {
         targetSdk = 37
         // Sentinelle is its own app identity now, distinct from the
         // Saracroche fork point — starting a clean version history rather
-        // than carrying over Saracroche's 5.1.1/36.
-        versionCode = 1
+        // than carrying over Saracroche's 5.1.1/36. See the version block
+        // at the top of this file for how these two are meant to move.
+        versionCode = appVersionCode
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionName = "1.0.0"
+        versionName = appVersionName
     }
 
     signingConfigs {
