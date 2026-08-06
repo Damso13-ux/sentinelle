@@ -74,6 +74,13 @@ android {
         // how the sheet itself is reached.
         buildConfig = true
     }
+    testOptions {
+        unitTests {
+            // Robolectric needs the merged resources/manifest to build its
+            // simulated Android environment.
+            isIncludeAndroidResources = true
+        }
+    }
     buildToolsVersion = "37.0.0"
 }
 
@@ -125,6 +132,11 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockwebserver)
     testImplementation(libs.kotlinx.coroutines.test)
+    // Robolectric: gives JVM unit tests a simulated Android Context, which
+    // is what DataStore-backed PreferencesManager needs. Avoids having to
+    // move these tests to a much slower instrumented (device) test run.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

@@ -15,6 +15,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.sentinelle.app.BuildConfig
 import com.sentinelle.app.spam.HeuristicSettings
 import com.sentinelle.app.ui.theme.ThemeVariant
 import kotlinx.coroutines.flow.Flow
@@ -71,6 +72,10 @@ object PreferencesManager {
     // only in debug builds (see BuildConfig.DEBUG check there), to test
     // Pro-gated UI before a real Play Console product exists.
     private val PRO_UNLOCKED_KEY = booleanPreferencesKey("pro_unlocked")
+
+    // Debug-only simulated unlock, kept separate from PRO_UNLOCKED_KEY so
+    // BillingManager's purchase re-sync can't clobber it. See proUnlocked().
+    private val PRO_DEBUG_OVERRIDE_KEY = booleanPreferencesKey("pro_debug_override")
 
     // Pro-gated heuristic tuning — see HeuristicSettings for defaults/ranges
     // and getEffectiveHeuristicSettings for how Pro status is enforced.
@@ -397,23 +402,67 @@ object PreferencesManager {
         }
     }
 
+    /**
+     * Whether Pro features should be treated as unlocked: either Play
+     * reported a real purchase, or the debug override is on in a debug
+     * build.
+     *
+     * The two are deliberately separate keys. BillingManager re-syncs
+     * [PRO_UNLOCKED_KEY] against Play's records on every connection and
+     * writes `false` when it finds no purchase — which is correct for real
+     * entitlement (a refund must take effect immediately) but would wipe a
+     * debug unlock the moment the Settings screen reconnects. Keeping the
+     * override in its own key means billing sync never touches it.
+     *
+     * The BuildConfig.DEBUG check is at *read* time, not just where the
+     * override is written, so a stored `true` is inert in a release build
+     * no matter how it got there.
+     */
+    private fun Preferences.proUnlocked(): Boolean {
+        val purchased = this[PRO_UNLOCKED_KEY] ?: false
+        val debugOverride = BuildConfig.DEBUG && (this[PRO_DEBUG_OVERRIDE_KEY] ?: false)
+        return purchased || debugOverride
+    }
+
     fun getProUnlockedFlow(context: Context): Flow<Boolean> =
         context.dataStore.data.map { preferences ->
-            preferences[PRO_UNLOCKED_KEY] ?: false
+            preferences.proUnlocked()
         }
 
     suspend fun isProUnlocked(context: Context): Boolean =
         context.dataStore.data
-            .map { preferences ->
-                preferences[PRO_UNLOCKED_KEY] ?: false
-            }.first()
+            .map { preferences -> preferences.proUnlocked() }
+            .first()
 
+    /**
+     * Records what Play actually reports. Only BillingManager should call
+     * this — it's the real entitlement, and it gets overwritten (including
+     * back to `false`) on every purchase re-check.
+     */
     suspend fun setProUnlocked(
         context: Context,
         unlocked: Boolean,
     ) {
         context.dataStore.edit { preferences ->
             preferences[PRO_UNLOCKED_KEY] = unlocked
+        }
+    }
+
+    /** Reads the debug override alone, for the debug toggles' own on/off state. */
+    suspend fun isProDebugOverrideEnabled(context: Context): Boolean =
+        BuildConfig.DEBUG &&
+            context.dataStore.data
+                .map { preferences -> preferences[PRO_DEBUG_OVERRIDE_KEY] ?: false }
+                .first()
+
+    /** No-op outside debug builds, so this can't unlock anything in release. */
+    suspend fun setProDebugOverride(
+        context: Context,
+        enabled: Boolean,
+    ) {
+        if (!BuildConfig.DEBUG) return
+        context.dataStore.edit { preferences ->
+            preferences[PRO_DEBUG_OVERRIDE_KEY] = enabled
         }
     }
 
@@ -476,7 +525,10 @@ object PreferencesManager {
     /** Same idea as getEffectiveHeuristicSettings: Garde for everyone unless Pro is confirmed unlocked right now. */
     fun getEffectiveThemeVariantFlow(context: Context): Flow<ThemeVariant> =
         context.dataStore.data.map { preferences ->
-            val proUnlocked = preferences[PRO_UNLOCKED_KEY] ?: false
-            if (!proUnlocked) ThemeVariant.GARDE else ThemeVariant.fromStorageKey(preferences[THEME_VARIANT_KEY])
+            if (!preferences.proUnlocked()) {
+                ThemeVariant.GARDE
+            } else {
+                ThemeVariant.fromStorageKey(preferences[THEME_VARIANT_KEY])
+            }
         }
 }

@@ -70,7 +70,7 @@ fun DebugSheet(onDismiss: () -> Unit) {
         deviceId = PreferencesManager.getDeviceId(context)
         countryCodes = PreferencesManager.getCountryCodes(context)
         apiKey = PreferencesManager.getApiKey(context)
-        proUnlocked = PreferencesManager.isProUnlocked(context)
+        proUnlocked = PreferencesManager.isProDebugOverrideEnabled(context)
     }
 
     ModalBottomSheet(
@@ -282,7 +282,7 @@ fun DebugSheet(onDismiss: () -> Unit) {
                     onClick = {
                         coroutineScope.launch {
                             val newValue = !proUnlocked
-                            PreferencesManager.setProUnlocked(context, newValue)
+                            PreferencesManager.setProDebugOverride(context, newValue)
                             proUnlocked = newValue
                             Toast
                                 .makeText(

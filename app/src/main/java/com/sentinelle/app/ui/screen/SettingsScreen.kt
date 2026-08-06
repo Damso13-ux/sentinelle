@@ -363,7 +363,7 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                                         if (proDebugTapCount >= 3) {
                                             proDebugTapCount = 0
                                             val newValue = !proUnlocked
-                                            coroutineScope.launch { PreferencesManager.setProUnlocked(context, newValue) }
+                                            coroutineScope.launch { PreferencesManager.setProDebugOverride(context, newValue) }
                                             Toast
                                                 .makeText(
                                                     context,
