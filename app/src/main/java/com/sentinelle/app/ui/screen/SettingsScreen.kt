@@ -113,7 +113,7 @@ fun SettingsSection(
             style =
                 MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.primary,
                 ),
             modifier = Modifier.padding(16.dp),
         )
@@ -455,7 +455,7 @@ fun SettingsScreen(
                     style =
                         MaterialTheme.typography.titleSmall.copy(
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = MaterialTheme.colorScheme.primary,
                         ),
                     modifier = Modifier.padding(16.dp),
                 )
@@ -579,7 +579,7 @@ fun SettingsScreen(
                                 contentColor = MaterialTheme.colorScheme.onError,
                             ),
                     ) {
-                        Text("Réinstaller", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Réinstaller", color = MaterialTheme.colorScheme.onError, fontWeight = FontWeight.Bold)
                     }
                 },
                 dismissButton = {
@@ -620,7 +620,7 @@ fun SettingsScreen(
                                 contentColor = MaterialTheme.colorScheme.onError,
                             ),
                     ) {
-                        Text("Réinitialiser", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text("Réinitialiser", color = MaterialTheme.colorScheme.onError, fontWeight = FontWeight.Bold)
                     }
                 },
                 dismissButton = {

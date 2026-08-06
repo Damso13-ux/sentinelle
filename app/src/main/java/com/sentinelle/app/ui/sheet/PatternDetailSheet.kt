@@ -201,17 +201,17 @@ fun PatternDetailSheet(
                     colors =
                         ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = Color.White,
+                            contentColor = MaterialTheme.colorScheme.onError,
                         ),
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Delete,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onError,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(deleteLabel, color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(deleteLabel, color = MaterialTheme.colorScheme.onError, fontWeight = FontWeight.Bold)
                 }
             }
 
@@ -249,7 +249,7 @@ fun PatternDetailSheet(
                             contentColor = MaterialTheme.colorScheme.onError,
                         ),
                 ) {
-                    Text("Supprimer", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Supprimer", color = MaterialTheme.colorScheme.onError, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -272,7 +272,10 @@ private fun DetailRow(
     icon: ImageVector,
     label: String,
     value: String,
-    iconTint: Color = Color.Black,
+    // Was Color.Black, which was already invisible against the dark theme
+    // this app used to force — it only ever worked because every call site
+    // happened to pass a tint.
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
     Row(
         modifier =

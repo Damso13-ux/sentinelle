@@ -263,7 +263,7 @@ fun SmsSettingsSheet(
                                     modifier = Modifier.size(18.dp),
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Activer l'accès aux notifications", color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("Activer l'accès aux notifications", fontWeight = FontWeight.Bold)
                             }
                         }
                     }

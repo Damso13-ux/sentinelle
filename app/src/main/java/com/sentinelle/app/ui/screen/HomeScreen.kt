@@ -9,8 +9,10 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -63,7 +65,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -77,6 +81,7 @@ import com.sentinelle.app.spam.HeuristicSettings
 import com.sentinelle.app.ui.dialog.CallScreeningFailedDialog
 import com.sentinelle.app.ui.sheet.CallSettingsSheet
 import com.sentinelle.app.ui.sheet.InfoSheet
+import com.sentinelle.app.ui.theme.SentinelleTheme
 import com.sentinelle.app.ui.sheet.SmsSettingsSheet
 import com.sentinelle.app.util.PermissionUtils
 import com.sentinelle.app.util.PermissionUtils.isNotificationPermissionGranted
@@ -530,132 +535,100 @@ fun CallScreeningEnabledCard(
     numberFormat: NumberFormat,
     onInfoClick: () -> Unit,
 ) {
+    // One solid block of colour carrying the whole answer to "am I
+    // protected?". The previous version mixed roles that don't belong
+    // together — a tertiaryContainer background with onPrimary text and a
+    // tertiary icon — which only held up because it had been nudged into
+    // place against one fixed dark background.
+    val containerColor =
+        if (callFilteringEnabled) SentinelleTheme.colors.success else MaterialTheme.colorScheme.error
+    val contentColor =
+        if (callFilteringEnabled) SentinelleTheme.colors.onSuccess else MaterialTheme.colorScheme.onError
+
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors =
-            CardDefaults.cardColors(
-                containerColor =
-                    if (callFilteringEnabled) {
-                        MaterialTheme.colorScheme.tertiaryContainer
-                    } else {
-                        MaterialTheme.colorScheme.errorContainer
-                    },
-            ),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+            Box(
+                modifier =
+                    Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(contentColor.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = if (callFilteringEnabled) Icons.Rounded.VerifiedUser else Icons.Rounded.Error,
                     contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = if (callFilteringEnabled) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(30.dp),
+                    tint = contentColor,
                 )
+            }
+
+            Text(
+                text = if (callFilteringEnabled) "Vous êtes protégé" else "Vous n'êtes pas protégé",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            )
+
+            // The headline says whether protection is on; this line says what
+            // it has done. A raw "0" reads as failure, so an untouched app
+            // says it is watching rather than showing an empty score.
+            Text(
+                text =
+                    when {
+                        !callFilteringEnabled -> "Activez le filtrage pour bloquer les appels indésirables."
+                        blockedCallsCount == 0 -> "Aucun appel indésirable pour le moment."
+                        blockedCallsCount == 1 -> "1 appel indésirable bloqué."
+                        else -> "$blockedCallsCount appels indésirables bloqués."
+                    },
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = contentColor.copy(alpha = 0.85f),
+            )
+
+            Text(
+                text =
+                    when {
+                        isListUpdateInProgress -> "Mise à jour de la liste..."
+                        isListUpdateFailed -> "La liste n'a pas pu être mise à jour."
+                        else -> "${numberFormat.format(totalBlockedNumbers)} numéros surveillés"
+                    },
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                color = contentColor.copy(alpha = 0.7f),
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Button(
+                onClick = onInfoClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = contentColor.copy(alpha = 0.18f),
+                        contentColor = contentColor,
+                    ),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (callFilteringEnabled) "Bloqueur actif et à jour" else "Le bloqueur n'est pas activé",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "En savoir plus",
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (callFilteringEnabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.error,
                 )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Phone,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = if (callFilteringEnabled) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = "Numéros dans la base de données",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        )
-                        Text(
-                            text =
-                                when {
-                                    isListUpdateInProgress -> "Chargement..."
-                                    isListUpdateFailed -> "Erreur"
-                                    else -> numberFormat.format(totalBlockedNumbers)
-                                },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.PhoneMissed,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                        tint = if (callFilteringEnabled) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.error,
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = "Appels bloqués",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        )
-                        Text(
-                            text =
-                                if (blockedCallsCount == 0) {
-                                    "Aucun"
-                                } else {
-                                    "$blockedCallsCount appel${if (blockedCallsCount > 1) "s" else ""} bloqué${if (blockedCallsCount > 1) "s" else ""}"
-                                },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
-                        )
-                    }
-                }
-
-                Button(
-                    onClick = onInfoClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor =
-                                if (callFilteringEnabled) {
-                                    MaterialTheme.colorScheme.tertiary
-                                } else {
-                                    MaterialTheme.colorScheme.error
-                                },
-                            contentColor =
-                                if (callFilteringEnabled) {
-                                    MaterialTheme.colorScheme.onTertiary
-                                } else {
-                                    MaterialTheme.colorScheme.onError
-                                },
-                        ),
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Info,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "En savoir plus",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
             }
         }
     }

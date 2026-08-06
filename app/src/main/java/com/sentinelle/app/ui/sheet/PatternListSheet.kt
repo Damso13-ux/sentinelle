@@ -529,7 +529,10 @@ private fun DetailRow(
     icon: ImageVector,
     label: String,
     value: String,
-    iconTint: Color = Color.Black,
+    // Was Color.Black, which was already invisible against the dark theme
+    // this app used to force — it only ever worked because every call site
+    // happened to pass a tint.
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
     Row(
         modifier =

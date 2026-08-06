@@ -1,0 +1,13 @@
+<resources>
+    <!--
+      The widget is built from RemoteViews, which run in the launcher's
+      process and can't read the Compose theme. These mirror the light half
+      of Color.kt; values-night/colors.xml carries the dark half, and the
+      system picks between them.
+    -->
+    <color name="widget_background">#FFFFFF</color>
+    <color name="widget_text_primary">#14161A</color>
+    <color name="widget_text_secondary">#5B6472</color>
+    <color name="widget_accent">#3D4FC4</color>
+    <color name="widget_success">#0C7E3D</color>
+</resources>

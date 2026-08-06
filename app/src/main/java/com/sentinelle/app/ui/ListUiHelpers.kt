@@ -5,9 +5,13 @@ import androidx.compose.material.icons.rounded.Block
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material.icons.rounded.Sms
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.sentinelle.app.data.PatternListEntity
+import com.sentinelle.app.ui.theme.SentinelleTheme
 import java.text.DateFormat
 import java.util.Locale
 
@@ -18,11 +22,20 @@ fun getTypeIcon(type: String): ImageVector =
         else -> Icons.Rounded.Block
     }
 
+/**
+ * Read from the theme rather than hard-coded: these used to be the old
+ * Garde teal and a fixed red, which meant they didn't move with the light
+ * scheme at all and stayed tuned for a dark background.
+ *
+ * "Allow" is the success green — a list that lets a number through is the
+ * same idea as being protected — and "block" is the error red.
+ */
+@Composable
+@ReadOnlyComposable
 fun getTypeColor(type: String): Color =
     when (type) {
-        PatternListEntity.TYPE_BLOCK -> Color(0xFFE4605F)
-        PatternListEntity.TYPE_ALLOW -> Color(0xFF1D9E75)
-        else -> Color(0xFFE4605F)
+        PatternListEntity.TYPE_ALLOW -> SentinelleTheme.colors.success
+        else -> MaterialTheme.colorScheme.error
     }
 
 fun getTypeLabel(
