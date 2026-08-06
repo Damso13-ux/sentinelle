@@ -27,6 +27,7 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Shield
 import androidx.compose.material.icons.rounded.WorkspacePremium
@@ -69,6 +70,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.android.billingclient.api.ProductDetails
 import com.sentinelle.app.billing.BillingManager
 import com.sentinelle.app.service.ListService
 import com.sentinelle.app.ui.sheet.DebugSheet
@@ -246,13 +248,20 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
     val selectedThemeVariant by
         PreferencesManager.getStoredThemeVariantFlow(context).collectAsState(initial = ThemeVariant.GARDE)
     val billingManager = remember { BillingManager(context) }
+    var proProductDetails by remember { mutableStateOf<ProductDetails?>(null) }
     DisposableEffect(Unit) {
         // Re-checks Play's purchase records on every visit to this screen,
         // not just after a purchase — a refund or a restore on a new
-        // device needs to be reflected here too.
-        billingManager.startConnection()
+        // device needs to be reflected here too. Also fetches the price so
+        // the purchase item can show it instead of a bare "Débloquer" —
+        // stays null (price-less fallback label) until the product exists
+        // in Play Console.
+        billingManager.startConnection {
+            billingManager.queryProDetails { proProductDetails = it }
+        }
         onDispose { billingManager.endConnection() }
     }
+    val proPrice = proProductDetails?.oneTimePurchaseOfferDetails?.formattedPrice
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -326,7 +335,12 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                 items =
                     listOf(
                         SettingsItem.Action(
-                            title = if (proUnlocked) "Sentinelle Pro actif" else "Débloquer Sentinelle Pro",
+                            title =
+                                when {
+                                    proUnlocked -> "Sentinelle Pro actif"
+                                    proPrice != null -> "Débloquer Sentinelle Pro — $proPrice"
+                                    else -> "Débloquer Sentinelle Pro"
+                                },
                             subtitle =
                                 if (proUnlocked) {
                                     "Merci pour ton soutien ! Export des stats, historique étendu, thèmes et réglages avancés sont débloqués."
@@ -347,6 +361,28 @@ fun SettingsScreen(onResetApp: () -> Unit = {}) {
                                 }
                             },
                         ),
+                    ) + if (!proUnlocked) {
+                        listOf(
+                            SettingsItem.Action(
+                                title = "Restaurer mes achats",
+                                subtitle = "Déjà acheté sur un autre appareil, ou après une réinstallation ?",
+                                icon = Icons.Rounded.Restore,
+                                onClick = {
+                                    billingManager.restorePurchases { found ->
+                                        val message =
+                                            if (found) {
+                                                "✅ Achat retrouvé — Sentinelle Pro est débloqué."
+                                            } else {
+                                                "Aucun achat Sentinelle Pro trouvé sur ce compte Google Play."
+                                            }
+                                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                                    }
+                                },
+                            ),
+                        )
+                    } else {
+                        emptyList()
+                    } + listOf(
                         SettingsItem.Action(
                             title = "Faire un don",
                             subtitle = "Soutenir le développement sans passer par un achat intégré.",

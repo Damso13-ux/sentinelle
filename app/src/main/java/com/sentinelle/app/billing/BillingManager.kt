@@ -9,6 +9,7 @@ import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.PendingPurchasesParams
+import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
@@ -18,6 +19,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Wraps Google Play Billing for the single "Sentinelle Pro" one-time
@@ -91,7 +93,16 @@ class BillingManager(
         )
     }
 
-    private fun restorePurchases() {
+    /**
+     * Re-checks Play's purchase records and syncs the local entitlement flag
+     * to match. Called silently on every connection (see [startConnection]);
+     * also exposed publicly so a "Restaurer mes achats" button can trigger
+     * the same check on demand and get an explicit result to show the user
+     * — useful after a reinstall or a device change, where the silent
+     * on-connect restore already ran but the user has no way to tell it
+     * found nothing. [onResult] always fires on the main thread.
+     */
+    fun restorePurchases(onResult: (foundPro: Boolean) -> Unit = {}) {
         val params =
             QueryPurchasesParams
                 .newBuilder()
@@ -99,7 +110,10 @@ class BillingManager(
                 .build()
 
         billingClient.queryPurchasesAsync(params) { billingResult, purchases ->
-            if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) return@queryPurchasesAsync
+            if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
+                onResult(false)
+                return@queryPurchasesAsync
+            }
 
             val stillOwnsPro =
                 purchases.any { purchase ->
@@ -107,15 +121,22 @@ class BillingManager(
                         purchase.purchaseState == Purchase.PurchaseState.PURCHASED
                 }
             purchases.forEach { handlePurchase(it) }
-            scope.launch { PreferencesManager.setProUnlocked(context, stillOwnsPro) }
+            scope.launch {
+                PreferencesManager.setProUnlocked(context, stillOwnsPro)
+                withContext(Dispatchers.Main) { onResult(stillOwnsPro) }
+            }
         }
     }
 
-    /** Looks up the Pro product and opens Play's purchase sheet for it. */
-    fun launchPurchaseFlow(
-        activity: Activity,
-        onError: (String) -> Unit = {},
-    ) {
+    /**
+     * Looks up the Pro product's current price/description without opening
+     * the purchase sheet — lets the Settings screen show a real price
+     * ("2,99 €") instead of a bare "Débloquer" button. [onResult] is null
+     * if the product can't be resolved yet (no connection, or the product
+     * doesn't exist in Play Console yet), in which case the caller should
+     * fall back to a price-less label rather than block on it.
+     */
+    fun queryProDetails(onResult: (ProductDetails?) -> Unit) {
         val productList =
             listOf(
                 QueryProductDetailsParams.Product
@@ -127,11 +148,24 @@ class BillingManager(
         val params = QueryProductDetailsParams.newBuilder().setProductList(productList).build()
 
         billingClient.queryProductDetailsAsync(params) { billingResult, result ->
-            val productDetails = result.productDetailsList.firstOrNull()
-            if (billingResult.responseCode != BillingClient.BillingResponseCode.OK || productDetails == null) {
-                Log.e(TAG, "Product lookup failed: ${billingResult.debugMessage}")
-                onError("Achat indisponible pour le moment.")
+            if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
+                onResult(null)
                 return@queryProductDetailsAsync
+            }
+            onResult(result.productDetailsList.firstOrNull())
+        }
+    }
+
+    /** Looks up the Pro product and opens Play's purchase sheet for it. */
+    fun launchPurchaseFlow(
+        activity: Activity,
+        onError: (String) -> Unit = {},
+    ) {
+        queryProDetails { productDetails ->
+            if (productDetails == null) {
+                Log.e(TAG, "Product lookup failed or returned nothing")
+                onError("Achat indisponible pour le moment.")
+                return@queryProDetails
             }
 
             val productDetailsParamsList =

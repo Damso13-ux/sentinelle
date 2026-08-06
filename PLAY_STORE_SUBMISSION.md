@@ -57,6 +57,7 @@ review tends to be faster/more reliable in English even for a French app).
 | Phone numbers | Yes, only if the user manually uses the "Signaler" (report) screen | Yes, sent to `app.saracroche.org` (third-party infrastructure of the upstream Saracroche project) | App functionality (crowd-sourced spam list) | Optional, explicit user action each time — never automatic |
 | Device or other IDs | Yes — an app-generated random UUID (not IMEI/hardware-derived) | Yes, sent to `app.saracroche.org` with every list-sync and report request | App functionality | Not linked to any user identity; no account exists |
 | SMS/message content | Processed on-device only (read via NotificationListenerService to decide whether to hide a notification) | **Not** transmitted off-device | App functionality | Confirm with Play's current definition of "collected" — on-device-only processing that never leaves the device typically doesn't count as "collected," but must still be disclosed as data *accessed* |
+| Purchase history | Yes — the one-time "Sentinelle Pro" purchase, handled entirely by Google Play Billing | Shared with Google Play (required for the purchase itself to work) — never with Sentinelle's own infrastructure, there is none for this | App functionality (unlocking Pro features) | Sentinelle never sees payment details; `BillingManager` only reads back purchase state (bought/not bought) from Play, cached locally as a boolean |
 | Everything else (location, contacts, financial info, health, photos, analytics/app activity, etc.) | No | No | — | No accounts, no ads SDK, no analytics/telemetry of any kind |
 
 **Is data encrypted in transit?** Yes (HTTPS to `app.saracroche.org`).
@@ -73,6 +74,31 @@ l'application" wipes everything on-device immediately.
 - Feature graphic `metadata/{en-US,fr-FR}/images/featureGraphic.png` (1024×500) — generated, Play-ready ✅
 - Screenshots (`metadata/*/images/phoneScreenshots/1-5.jpg`) — real captures from the current build: Accueil, Statistiques, Signaler, Listes, Réglages ✅
 
+## In-app purchase ("Sentinelle Pro") — Play Console setup
+
+Client-side plumbing is done (`BillingManager`, gated features, price display,
+restore-purchases button). Everything below only happens inside Play Console
+itself, most of it requiring the account owner's own login (and, for the
+merchant profile, banking/identity details Claude must never touch):
+
+- [ ] Merchant/payments profile verified (Play Console → Monetization setup) —
+      was still "pending verification" as of the Billing plumbing commit
+- [ ] App uploaded to at least the Internal Testing track — real product
+      lookups generally don't resolve on a sideloaded debug APK, the app
+      needs a Play Console listing to test against
+- [ ] Create the one-time product: Monetize → Products → Product ID
+      **exactly** `sentinelle_pro` (must match `BillingManager.PRO_PRODUCT_ID`,
+      cannot be changed after creation), name "Sentinelle Pro", a short
+      description of what it unlocks, and a price
+- [ ] **Activate** the product after creating it — a draft/inactive product
+      resolves to nothing, even for license testers
+- [ ] Add your own Gmail (and any other testers) under License Testing so
+      test purchases don't charge real money
+- [ ] End-to-end test: install from the Internal Testing track (not
+      sideloaded), open Réglages, confirm the real price now shows on the
+      purchase button, complete a test purchase, confirm Pro features unlock
+      and "Restaurer mes achats" reports success on a second device/reinstall
+
 ## Other blockers before submission
 
 - [x] Enable GitHub Pages for the privacy policy — live at https://damso13-ux.github.io/sentinelle/
@@ -85,3 +111,9 @@ l'application" wipes everything on-device immediately.
 All repo-side prep is done — AAB, store assets, screenshots, privacy policy,
 permission justifications. What's left only happens inside Play Console
 itself (upload, forms, closed test).
+
+The in-app purchase is not a submission blocker: every Pro-gated feature
+degrades gracefully to the free default when the product doesn't resolve
+(no crash, just a bare "Débloquer" label with no price and a purchase
+attempt that fails softly with a toast). Submitting before finishing the
+Play Console IAP setup above is fine — Pro can go live in a later update.
