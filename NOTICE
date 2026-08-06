@@ -50,6 +50,13 @@ Résumé des changements effectués depuis le fork :
     filtrage.
   - Implémentation du scoring heuristique de spam pour les SMS
     (auparavant un stub renvoyant toujours 0).
+  - Ajout d'un débloquage optionnel « Sentinelle Pro » via Google Play
+    Facturation (achat unique, sans abonnement) : export CSV de
+    l'historique de blocages, fenêtre d'analyse heuristique étendue,
+    deux thèmes visuels additionnels, réglages avancés de détection.
+    Toutes les fonctionnalités de blocage restent gratuites et
+    inchangées ; aucune n'est restreinte par cet ajout. Ajout d'un lien
+    de don optionnel (PayPal), séparé de l'achat intégré.
 
 Ce fichier NOTICE est fourni pour satisfaire aux exigences d'attribution et
 de « signalement des changements » de la GPLv3 §5. Il ne modifie pas les

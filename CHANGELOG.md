@@ -7,9 +7,27 @@ et ce projet respecte le [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 ## [Unreleased]
 
+### Ajouté
+
+- Historique unifié des événements bloqués (appels et SMS) avec tableau de bord statistique : tendance quotidienne, numéros les plus bloqués, raison de chaque blocage, export CSV (Pro)
+- Scoring de spam heuristique sur l'appareil (fréquence d'appels, horaires, préfixes suspects), opt-in, avec un « mode silencieux » pour observer sans bloquer
+- Recherche/labellisation de numéro façon Truecaller-lite, strictement locale (« Mes labels »), intégration de la liste officielle des préfixes de démarchage ARCEP
+- Bulle d'identification d'appel affichée à l'écran pendant un appel entrant (opt-in)
+- Action rapide « Ce n'est pas un spam » sur les notifications d'appel bloqué
+- Widget d'écran d'accueil et raccourcis d'application (App Shortcuts)
+- Détection des réglages d'optimisation de batterie pouvant empêcher un filtrage fiable (MIUI et équivalents)
+- Débloquage optionnel « Sentinelle Pro » (achat unique via Google Play Facturation, jamais d'abonnement) : export CSV, historique heuristique étendu (jusqu'à 30 jours), deux thèmes additionnels (Corail, Violet), réglages avancés de détection ; lien de don optionnel (PayPal)
+- Intégration continue (GitHub Actions) sur chaque push/PR
+
+### Corrigé
+
+- Filtrage de SMS par mot-clé, auparavant du code mort inatteignable
+- Les expéditeurs de SMS alphanumériques contournaient entièrement le filtrage
+
 ### Modifié
 
 - Forké depuis Saracroche v5.1.1 et rebrandé en Sentinelle (nouveau package `com.sentinelle.app`) ; voir [NOTICE](NOTICE) pour l'attribution et un résumé des changements.
+- Refonte visuelle complète (thème sombre « Garde »)
 
 ## [5.1.1] - 2026-07-22
 
