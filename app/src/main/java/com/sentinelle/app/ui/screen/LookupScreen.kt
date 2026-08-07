@@ -65,6 +65,7 @@ import com.sentinelle.app.data.PatternListEntity
 import com.sentinelle.app.ui.NUMBER_LABEL_CATEGORIES
 import com.sentinelle.app.ui.categoryIcon
 import com.sentinelle.app.ui.categoryLabel
+import com.sentinelle.app.ui.formatPhoneNumberForDisplay
 import com.sentinelle.app.ui.viewmodel.lookup.LookupResult
 import com.sentinelle.app.ui.viewmodel.lookup.LookupViewModel
 import com.sentinelle.app.ui.viewmodel.lookup.LookupViewModelFactory
@@ -183,7 +184,11 @@ private fun LookupResultCard(
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(
-                text = result.displayNumber,
+                // displayNumber reste en E.164 : il alimente le
+                // pré-remplissage du signalement, qui a besoin d'un numéro
+                // complet. Ici on affiche la forme lisible, la même que
+                // dans le tableau de bord.
+                text = formatPhoneNumberForDisplay(result.phoneNumber),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
