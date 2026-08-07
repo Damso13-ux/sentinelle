@@ -335,8 +335,24 @@ une durée *pendant laquelle* le seuil est tenu, pas un délai qui s'écoule
 depuis l'ouverture du test. Le compteur démarre au douzième inscrit.
 Chaque jour de recrutement décale donc la production d'autant.
 
-Le lien d'inscription se récupère dans le canal fermé → onglet Testeurs →
-« Participer sur Android » / « Participer sur le Web » → *Copier le lien*.
+**Aucun e-mail n'est envoyé automatiquement.** Ajouter une adresse à la
+liste de diffusion ne fait qu'autoriser la personne à rejoindre le test :
+c'est au développeur de lui transmettre le lien, et à elle de l'ouvrir et
+d'accepter depuis son compte Google. Rien ne part de chez Google.
+
+Lien d'inscription (vérifié le 8 août 2026 — il affiche bien la page
+« Become a tester » pour Sentinelle) :
+
+```
+https://play.google.com/apps/testing/io.github.damso13ux.sentinelle
+```
+
+Il se retrouve aussi dans le canal fermé → onglet Testeurs → « Participer
+sur Android » / « Participer sur le Web » → *Copier le lien*.
+
+Le compte utilisé pour ouvrir le lien doit être **exactement** celui inscrit
+sur la liste de diffusion. Sur un téléphone avec plusieurs comptes Google,
+c'est la cause d'échec la plus courante.
 
 ## Signature Play ≠ signature locale : désinstaller avant d'installer
 
