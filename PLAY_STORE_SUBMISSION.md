@@ -264,6 +264,45 @@ version, il faut pouvoir retrouver le raisonnement.
 **requise** — elle a lieu à chaque synchronisation, sans action de
 l'utilisateur.
 
+## Signature Play ≠ signature locale : désinstaller avant d'installer
+
+Piège rencontré à la première installation depuis Play, le 7 août 2026.
+L'installation échouait sur un « Une erreur s'est produite de notre
+côté » peu bavard.
+
+Cause réelle, mesurée :
+
+| Binaire | SHA-256 du certificat |
+|---|---|
+| APK construit ici (`app-release.apk`) | `2324b0aa…d451` |
+| Ce que Play distribue | `9a7a8813…99ab` |
+
+Depuis l'activation de Play App Signing, le keystore local n'est plus
+qu'une **clé d'importation** : elle prouve à Google que l'envoi vient
+bien de nous, mais ce n'est plus elle qui signe ce que les utilisateurs
+reçoivent. Google a généré sa propre clé de distribution.
+
+Même `applicationId`, signatures différentes : Android refuse d'installer
+par-dessus, et c'est voulu — c'est ce qui empêche de remplacer une appli
+par une autre.
+
+Conséquences pratiques :
+
+- Un appareil portant un build sideloadé doit **désinstaller** avant
+  d'installer depuis Play. La désinstallation efface toutes les données
+  locales (listes personnelles, historique, réglages) : tout est local
+  par conception, il n'existe aucune sauvegarde serveur.
+- Cela vaut pour tout testeur ayant reçu un APK à la main.
+- Un APK local ne s'installera plus par-dessus la version Play. Pour
+  tester une modification, soit désinstaller à nouveau, soit passer par
+  le canal de test interne — plus lent, mais c'est ce qui teste
+  réellement le binaire distribué.
+
+Les empreintes se retrouvent dans Play Console → Signature d'application,
+et côté APK via
+`apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk`
+(nécessite `JAVA_HOME`, par exemple le JBR d'Android Studio).
+
 ## Status: live on the Internal Testing track
 
 All repo-side prep is done — AAB, store assets, screenshots, privacy policy,
