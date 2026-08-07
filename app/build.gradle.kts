@@ -46,7 +46,17 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.sentinelle.app"
+        // Différent du `namespace` au-dessus, volontairement. Le namespace
+        // est le package des sources (classes, R, BuildConfig) ; c'est
+        // l'applicationId qui identifie l'app sur Play, et il est
+        // définitif une fois la fiche créée.
+        //
+        // « com.sentinelle.app » était déjà pris sur Play. Celui-ci suit la
+        // convention du DNS inversé appliquée à un domaine réellement
+        // contrôlé — damso13-ux.github.io, qui héberge déjà la politique de
+        // confidentialité. Le tiret disparaît : un segment de package Java
+        // ne peut pas en contenir.
+        applicationId = "io.github.damso13ux.sentinelle"
         minSdk = 29
         targetSdk = 37
         // Sentinelle is its own app identity now, distinct from the

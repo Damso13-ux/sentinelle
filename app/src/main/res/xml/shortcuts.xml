@@ -8,7 +8,7 @@
         android:shortcutLongLabel="@string/shortcut_lookup_long">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.sentinelle.app"
+            android:targetPackage="io.github.damso13ux.sentinelle"
             android:targetClass="com.sentinelle.app.MainActivity">
             <extra
                 android:name="shortcut_destination"
@@ -23,7 +23,7 @@
         android:shortcutLongLabel="@string/shortcut_report_long">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetPackage="com.sentinelle.app"
+            android:targetPackage="io.github.damso13ux.sentinelle"
             android:targetClass="com.sentinelle.app.MainActivity">
             <extra
                 android:name="shortcut_destination"

@@ -74,6 +74,27 @@ l'application" wipes everything on-device immediately.
 - Feature graphic `metadata/{en-US,fr-FR}/images/featureGraphic.png` (1024×500) — generated, Play-ready ✅
 - Screenshots (`metadata/*/images/phoneScreenshots/1-5.jpg`) — real captures from the current build: Accueil, Statistiques, Signaler, Listes, Réglages ✅
 
+## Identifiant de l'application
+
+`io.github.damso13ux.sentinelle`, et non `com.sentinelle.app` : ce dernier
+était déjà pris sur Play au moment de créer la fiche.
+
+À ne pas confondre avec le `namespace` de `app/build.gradle.kts`, resté à
+`com.sentinelle.app`. Le namespace est le package des sources — classes,
+`R`, `BuildConfig` — et n'a aucune existence côté Play. C'est
+l'`applicationId` qui identifie l'app, et c'est lui qui devait changer.
+D'où un correctif tenant en deux fichiers, sans déplacer une seule classe.
+
+Deux conséquences à garder en tête :
+
+- **L'applicationId est définitif** une fois la fiche créée. Il ne peut
+  plus être modifié, jamais ; en changer imposerait une nouvelle fiche,
+  sans les avis ni les installations de l'ancienne.
+- **Un applicationId différent est une application différente** pour
+  Android. Un appareil qui a l'ancienne version installée verra la
+  nouvelle comme une app distincte et les installera côte à côte, chacune
+  avec ses propres données.
+
 ## Versioning
 
 Both numbers live at the top of `app/build.gradle.kts` (`appVersionCode` /
