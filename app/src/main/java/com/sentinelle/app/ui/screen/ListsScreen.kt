@@ -89,7 +89,7 @@ fun ListsScreen() {
             LargeTopAppBar(
                 title = {
                     Text(
-                        text = "Listes",
+                        text = "Mes filtres",
                         fontWeight = FontWeight.ExtraBold,
                     )
                 },
@@ -108,7 +108,7 @@ fun ListsScreen() {
                     .verticalScroll(scrollState),
         ) {
             ListSection(
-                title = "Listes personnelle",
+                title = "Mes listes",
                 description =
                     "Ajoutez vos propres numéros, préfixes ou mots-clés SMS pour qu'ils soient " +
                         "autorisés, identifiés ou bloqués.",
@@ -119,12 +119,12 @@ fun ListsScreen() {
             )
 
             ListSection(
-                title = "Listes publiques",
+                title = "Listes partagées",
                 description =
-                    "Les listes publiques de Sentinelle sont triées par priorité " +
-                        "d'exécution. Vous pouvez les activer ou les désactiver.",
+                    "Listes de numéros indésirables mises à jour automatiquement. " +
+                        "Vous pouvez les activer ou les désactiver.",
                 lists = sortedApiLists,
-                emptyMessage = "Les listes publiques sont téléchargées automatiquement. Veuillez patienter.",
+                emptyMessage = "Téléchargement des listes en cours...",
                 numberFormat = numberFormat,
                 onClick = { openListId = it },
             )
