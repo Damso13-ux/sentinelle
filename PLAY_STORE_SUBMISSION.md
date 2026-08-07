@@ -264,6 +264,45 @@ version, il faut pouvoir retrouver le raisonnement.
 **requise** — elle a lieu à chaque synchronisation, sans action de
 l'utilisateur.
 
+## Test fermé — envoyé en examen le 7 août 2026
+
+Envoi n° 1, 21:44, **en cours d'examen**. C'est le premier examen humain de
+Sentinelle : Google y lit les justifications de permissions sensibles
+(filtrage d'appels, accès aux notifications, overlay).
+
+Canal « Tests fermés - Alpha », release `2 (1.0.0-alpha02)` reprise depuis
+la bibliothèque — aucun nouveau build, donc le binaire examiné est
+exactement celui déjà validé sur appareil.
+
+- **Pays** : France (+ 11 territoires), Belgique, Suisse, Luxembourg,
+  Monaco. Les listes sont des numéros français, mais ouvrir aux pays
+  francophones voisins évite qu'un testeur soit bloqué à l'installation —
+  et réunir les 12 est le vrai chemin critique.
+- **Testeurs** : liste « Testeurs test fermé », 3 adresses sur les 12
+  requises. Liste éditable à tout moment sans nouvel examen.
+- **Retours** : `damdam13122@gmail.com`, annoncé dans les notes de version.
+- **Publication gérée : désactivée** — dès approbation, ça part sur le
+  canal fermé sans revalidation. Voulu : les 14 jours démarrent au plus tôt.
+
+### Deux pièges rencontrés à l'envoi
+
+**Déclaration « identifiant publicitaire » manquante.** Bloquant réel et
+non évident : elle ne figure ni dans les tâches du tableau de bord ni dans
+le canal de test, mais dans Contenu de l'application → Identifiant
+publicitaire (`/app-content/ad-id-declaration`). Obligatoire dès qu'on
+cible Android 13+. Réponse : **Non**, vérifiée deux fois — aucun SDK
+publicitaire dans les sources, et surtout aucune permission
+`com.google.android.gms.permission.AD_ID` dans le manifeste **fusionné**
+du bundle. C'est ce dernier contrôle qui compte : Google avertit qu'un SDK
+tiers peut injecter la permission sans déclaration explicite, et le
+manifeste fusionné est justement l'endroit où cela se verrait.
+
+**Enregistrer ≠ envoyer.** Deux actions distinctes, et rien dans l'écran
+ne le souligne. Le seul endroit qui fait foi est
+`/publishing/submission-activity` : tant qu'il affiche « Vous n'avez aucun
+envoi récent », rien n'est parti, quoi qu'affiche le reste de la console.
+À revérifier là à chaque envoi.
+
 ## Signature Play ≠ signature locale : désinstaller avant d'installer
 
 Piège rencontré à la première installation depuis Play, le 7 août 2026.
