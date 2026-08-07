@@ -110,7 +110,7 @@ fun DashboardScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
-                title = { Text("Statistiques", fontWeight = FontWeight.ExtraBold) },
+                title = { Text("Activité", fontWeight = FontWeight.ExtraBold) },
                 scrollBehavior = scrollBehavior,
                 windowInsets = WindowInsets.statusBars,
                 actions = {
