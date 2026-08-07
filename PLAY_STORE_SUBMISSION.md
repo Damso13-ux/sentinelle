@@ -264,11 +264,15 @@ version, il faut pouvoir retrouver le raisonnement.
 **requise** — elle a lieu à chaque synchronisation, sans action de
 l'utilisateur.
 
-## Test fermé — envoyé en examen le 7 août 2026
+## Test fermé — approuvé et en ligne depuis le 7 août 2026
 
-Envoi n° 1, 21:44, **en cours d'examen**. C'est le premier examen humain de
-Sentinelle : Google y lit les justifications de permissions sensibles
-(filtrage d'appels, accès aux notifications, overlay).
+Envoi n° 1 à 21:44, **approuvé et publié à 21:53** (neuf minutes). C'était
+le premier examen humain de Sentinelle : Google y lit les justifications
+de permissions sensibles (filtrage d'appels, accès aux notifications,
+overlay). Elles sont donc passées telles qu'écrites plus haut.
+
+État constaté dans la console : canal « Tests fermés - Alpha » **Actif**,
+release `2 (1.0.0-alpha02)` « Disponible pour certains testeurs ».
 
 Canal « Tests fermés - Alpha », release `2 (1.0.0-alpha02)` reprise depuis
 la bibliothèque — aucun nouveau build, donc le binaire examiné est
@@ -279,7 +283,9 @@ exactement celui déjà validé sur appareil.
   francophones voisins évite qu'un testeur soit bloqué à l'installation —
   et réunir les 12 est le vrai chemin critique.
 - **Testeurs** : liste « Testeurs test fermé », 3 adresses sur les 12
-  requises. Liste éditable à tout moment sans nouvel examen.
+  requises. Liste éditable à tout moment sans nouvel examen. **Attention :
+  une adresse sur la liste n'est pas un testeur inscrit** — voir la section
+  suivante.
 - **Retours** : `damdam13122@gmail.com`, annoncé dans les notes de version.
 - **Publication gérée : désactivée** — dès approbation, ça part sur le
   canal fermé sans revalidation. Voulu : les 14 jours démarrent au plus tôt.
@@ -302,6 +308,35 @@ ne le souligne. Le seul endroit qui fait foi est
 `/publishing/submission-activity` : tant qu'il affiche « Vous n'avez aucun
 envoi récent », rien n'est parti, quoi qu'affiche le reste de la console.
 À revérifier là à chaque envoi.
+
+## Accès en production : « inscrit » ≠ « invité »
+
+Relevé dans la console (Tableau de bord → Production → Demander un accès en
+production), formulation exacte de Google et avancement réel :
+
+| | Condition | État |
+|---|---|---|
+| ✅ | Publier une version de test fermé | Fait |
+| ⭕ | Avoir au moins 12 testeurs **inscrits** à votre test fermé | *0 testeur actuellement inscrit* |
+| ⭕ | Exécuter votre test fermé avec au moins 12 testeurs **pour au moins 14 jours** | Pas commencé |
+
+Deux pièges de comptage, tous deux coûteux en temps :
+
+**Une adresse ajoutée à la liste de diffusion ne compte pas.** La liste
+« Testeurs test fermé » contient 3 adresses, et la console affiche pourtant
+*0 testeur actuellement inscrit*. Google ne compte que les personnes qui
+ont réellement suivi le lien d'inscription et rejoint le programme depuis
+leur compte Google. Inviter, c'est le début du travail, pas la fin — il
+faut que chacun clique et accepte.
+
+**Les 14 jours ne courent pas tant que les 12 ne sont pas réunis.** La
+condition dit « avec au moins 12 testeurs pour au moins 14 jours » : c'est
+une durée *pendant laquelle* le seuil est tenu, pas un délai qui s'écoule
+depuis l'ouverture du test. Le compteur démarre au douzième inscrit.
+Chaque jour de recrutement décale donc la production d'autant.
+
+Le lien d'inscription se récupère dans le canal fermé → onglet Testeurs →
+« Participer sur Android » / « Participer sur le Web » → *Copier le lien*.
 
 ## Signature Play ≠ signature locale : désinstaller avant d'installer
 
