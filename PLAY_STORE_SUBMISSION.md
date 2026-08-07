@@ -128,9 +128,13 @@ restore-purchases button). Everything below only happens inside Play Console
 itself, most of it requiring the account owner's own login (and, for the
 merchant profile, banking/identity details Claude must never touch):
 
-- [ ] Merchant/payments profile verified (Play Console → Monetization setup) —
-      was still "pending verification" as of the Billing plumbing commit
-- [ ] App uploaded to at least the Internal Testing track — real product
+- [ ] Merchant/payments profile — **not created at all** as of 7 August 2026.
+      "Produits ponctuels" refuses access outright: *« Vous devez configurer
+      un compte marchand Google Payments pour pouvoir accéder à cette
+      page »*. Everything else in this section is blocked behind it. It asks
+      for identity and banking details, so it can only be done by the
+      account owner in person.
+- [x] App uploaded to at least the Internal Testing track — real product
       lookups generally don't resolve on a sideloaded debug APK, the app
       needs a Play Console listing to test against
 - [ ] Create the one-time product: Monetize → Products → Product ID
@@ -149,9 +153,56 @@ merchant profile, banking/identity details Claude must never touch):
 ## Other blockers before submission
 
 - [x] Enable GitHub Pages for the privacy policy — live at https://damso13-ux.github.io/sentinelle/
+- [x] Content rating questionnaire (Play Console, straightforward — no mature content)
+- [x] Target audience / age declaration (Play Console)
 - [ ] New developer accounts must run a closed test (Play's current policy: ~12 testers for ~14 days) before Production release is unlocked
-- [ ] Content rating questionnaire (Play Console, straightforward — no mature content)
-- [ ] Target audience / age declaration (Play Console)
+
+## Catégorie, tags et coordonnées
+
+Saisis le 7 août 2026.
+
+**Catégorie : Communication**, et non Outils. C'est là que se trouvent
+Truecaller, Hiya et les autres filtres d'appels — donc là que les
+utilisateurs cherchent. « Outils » est un fourre-tout nettement plus
+concurrentiel.
+
+**Tags retenus : « Identification de l'appelant » (Communication) et « Vie
+privée et sécurité » (Outils).** Deux seulement, sur cinq possibles.
+
+Les tags décident du groupe d'applications auquel Play compare la fiche,
+d'où deux exclusions volontaires malgré leur nom trompeur :
+
+- *SMS* — sa définition Play vise les applis qui **envoient** des
+  messages (« permettent d'envoyer des messages à un ou plusieurs autres
+  utilisateurs »). Sentinelle n'en envoie aucun.
+- *Communication* (le tag générique, distinct de la catégorie) — même
+  problème : « échanger des fichiers et des SMS […] messagerie, SMS/MMS
+  et chat ».
+
+Le cocher aurait fait comparer Sentinelle à WhatsApp et Messages. Rien
+d'autre dans le catalogue Play ne correspond : pas de tag « spam », «
+blocage » ni « téléphonie ».
+
+**Coordonnées publiques** : `damdam13122@gmail.com` (déjà publique sur la
+politique de confidentialité, donc aucune exposition nouvelle) et
+`https://github.com/Damso13-ux/sentinelle` comme site Web — le dépôt est
+la vraie page projet, et la politique de confidentialité a déjà son
+propre champ. Numéro de téléphone laissé vide : facultatif, et il serait
+affiché publiquement.
+
+## Test interne — en place depuis le 7 août 2026
+
+Release `2 (1.0.0-alpha02)` publiée sur le canal Tests internes, liste de
+diffusion « Testeurs internes » (1 adresse). Lien d'inscription :
+`https://play.google.com/apps/internaltest/4701642787629830767`
+
+Deux avertissements à l'aperçu, tous deux inoffensifs :
+
+- *Aucun testeur désigné* — normal, la liste a été créée après coup.
+- *Code natif sans symboles de débogage* — les seuls `.so` du bundle sont
+  `libandroidx.graphics.path.so` (tiré par Compose) et
+  `libdatastore_shared_counter.so`. Aucun code à nous : importer des
+  symboles n'apporterait rien, Google possède déjà ceux d'AndroidX.
 
 ## Release build verified on device
 
@@ -213,11 +264,15 @@ version, il faut pouvoir retrouver le raisonnement.
 **requise** — elle a lieu à chaque synchronisation, sans action de
 l'utilisateur.
 
-## Status: ready to submit
+## Status: live on the Internal Testing track
 
 All repo-side prep is done — AAB, store assets, screenshots, privacy policy,
-permission justifications, and the release build is device-verified. What's
-left only happens inside Play Console itself (upload, forms, closed test).
+permission justifications, and the release build is device-verified. Every
+"Terminer la configuration de votre appli" task is now closed (11/11) and
+the section has disappeared from the dashboard.
+
+What's left: the mandatory closed test (~12 testers / ~14 days) before
+Production unlocks, and the merchant profile that gates the in-app product.
 
 The in-app purchase is not a submission blocker: every Pro-gated feature
 degrades gracefully to the free default when the product doesn't resolve
