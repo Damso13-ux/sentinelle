@@ -1,4 +1,4 @@
-Sentinelle est une application Android qui vous protège des appels et SMS indésirables. Elle est issue d'un fork du projet open source Saracroche (GPLv3) et évolue vers une protection plus large sur l'appareil : blocage d'appels/SMS indésirables, tableau de bord statistique local, et un moteur de score de spam heuristique fonctionnant entièrement sur l'appareil.
+Sentinelle est une application Android qui vous protège des appels et SMS indésirables. Elle est issue d'un fork du projet open source Saracroche (GPLv3) et évolue vers une protection plus large sur l'appareil : blocage d'appels et SMS indésirables, historique local des blocages, et un moteur de score heuristique fonctionnant entièrement sur l'appareil.
 
 <b>Fonctionnalités :</b>
 • Bloque automatiquement les numéros et SMS de spam
