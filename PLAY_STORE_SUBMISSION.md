@@ -132,11 +132,29 @@ merchant profile, banking/identity details Claude must never touch):
 - [ ] Content rating questionnaire (Play Console, straightforward — no mature content)
 - [ ] Target audience / age declaration (Play Console)
 
+## Release build verified on device
+
+The ProGuard rules were narrowed during the audit (the blanket
+`-keep class com.sentinelle.app.**` was replaced by targeted rules), so R8
+now actually shrinks app code — around 278 KB less. Anything that had only
+survived because of the old catch-all rule would have broken at runtime,
+in release builds only, and no debug build or unit test would have caught
+it.
+
+A signed release APK of 1.0.0-alpha02 (versionCode 2) was installed and
+exercised on a real device: every screen opened, list update triggered,
+call blocking and the identified-call notification confirmed working. That
+closes the one unknown that couldn't be checked from the build alone.
+
+Worth repeating for any future change to `proguard-rules.pro`: test a real
+release build on a device before uploading. `-PuseDebugSigningForRelease`
+makes that possible on a machine without the signing key.
+
 ## Status: ready to submit
 
 All repo-side prep is done — AAB, store assets, screenshots, privacy policy,
-permission justifications. What's left only happens inside Play Console
-itself (upload, forms, closed test).
+permission justifications, and the release build is device-verified. What's
+left only happens inside Play Console itself (upload, forms, closed test).
 
 The in-app purchase is not a submission blocker: every Pro-gated feature
 degrades gracefully to the free default when the product doesn't resolve
