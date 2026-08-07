@@ -86,6 +86,12 @@ object PreferencesManager {
     // Pro-gated theme variant — see ThemeVariant and getEffectiveThemeVariant.
     private val THEME_VARIANT_KEY = stringPreferencesKey("theme_variant")
 
+    // Whether the first-launch walkthrough has been seen. Sentinelle does
+    // nothing at all until the user grants the call-screening role and (for
+    // SMS) notification access, and neither is something Android prompts for
+    // on its own — an install that skips both looks like a broken app.
+    private val ONBOARDING_COMPLETED_KEY = booleanPreferencesKey("onboarding_completed")
+
     private val DEFAULT_COUNTRY_PREFIXES = setOf("33")
     private const val DEFAULT_COUNTRY_CODES = "FR"
 
@@ -519,6 +525,22 @@ object PreferencesManager {
     ) {
         context.dataStore.edit { preferences ->
             preferences[THEME_VARIANT_KEY] = variant.storageKey
+        }
+    }
+
+    // --- Onboarding ------------------------------------------------------
+
+    fun getOnboardingCompletedFlow(context: Context): Flow<Boolean> =
+        context.dataStore.data.map { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] ?: false
+        }
+
+    suspend fun setOnboardingCompleted(
+        context: Context,
+        completed: Boolean,
+    ) {
+        context.dataStore.edit { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] = completed
         }
     }
 

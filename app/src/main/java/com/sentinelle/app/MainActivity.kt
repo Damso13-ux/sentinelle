@@ -46,6 +46,7 @@ import com.sentinelle.app.ui.screen.HomeScreen
 import com.sentinelle.app.ui.screen.ListsScreen
 import com.sentinelle.app.ui.screen.LookupScreen
 import com.sentinelle.app.ui.screen.MyLabelsScreen
+import com.sentinelle.app.ui.screen.OnboardingScreen
 import com.sentinelle.app.ui.screen.ReportScreen
 import com.sentinelle.app.ui.screen.SettingsScreen
 import com.sentinelle.app.ui.theme.AppTheme
@@ -103,11 +104,30 @@ class MainActivity : ComponentActivity() {
                 .getEffectiveThemeVariantFlow(this)
                 .collectAsState(initial = com.sentinelle.app.ui.theme.ThemeVariant.INDIGO)
 
+            // null while DataStore is still being read on first frame. Showing
+            // the app and then yanking it away for the walkthrough would be
+            // worse than a blank frame, so wait for the real value.
+            val onboardingCompleted by PreferencesManager
+                .getOnboardingCompletedFlow(this)
+                .collectAsState(initial = null)
+
             AppTheme(themeVariant = themeVariant) {
-                SentinelleApp(
-                    shortcutDestination = shortcutDestination,
-                    onShortcutDestinationConsumed = { shortcutDestination = null },
-                )
+                when (onboardingCompleted) {
+                    null -> Unit
+
+                    false ->
+                        OnboardingScreen(
+                            // setOnboardingCompleted is written by the screen
+                            // itself; the flow above then flips this to true.
+                            onFinished = {},
+                        )
+
+                    true ->
+                        SentinelleApp(
+                            shortcutDestination = shortcutDestination,
+                            onShortcutDestinationConsumed = { shortcutDestination = null },
+                        )
+                }
             }
         }
     }
@@ -152,6 +172,26 @@ class MainActivity : ComponentActivity() {
 // this in sync with shortcuts.xml.
 private val VALID_SHORTCUT_DESTINATIONS = setOf("lookup", "report")
 
+// Every navigation *to a bottom-nav destination* has to go through this,
+// including the ones triggered from inside a screen (InfoSheet's "Voir les
+// statistiques", for instance). A plain navigate() to the same route pushes
+// it without the saveState/restoreState bookkeeping the tab bar depends on,
+// so the two end up disagreeing about the back stack and the Accueil tab
+// stops responding — reachable only with the system Back button.
+//
+// Destinations that are *not* tabs (lookup, report, my-labels, lists) keep
+// using a plain navigate(): they're meant to stack on top of the current
+// tab and be dismissed with Back.
+private fun NavHostController.navigateToTab(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
 @Preview
 @Composable
 fun SentinelleApp(
@@ -183,7 +223,9 @@ fun SentinelleApp(
         ) {
             composable("home") {
                 HomeScreen(
-                    onOpenDashboard = { navController.navigate("dashboard") },
+                    // "dashboard" is a tab, so it must not be pushed with a
+                    // plain navigate() — see navigateToTab.
+                    onOpenDashboard = { navController.navigateToTab("dashboard") },
                     onOpenLookup = { navController.navigate("lookup") },
                 )
             }
@@ -265,15 +307,7 @@ private fun BottomNavigationBar(navController: NavHostController) {
                 icon = { Icon(item.icon, contentDescription = item.title) },
                 label = { Text(item.title) },
                 selected = isSelected,
-                onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
+                onClick = { navController.navigateToTab(item.route) },
             )
         }
     }

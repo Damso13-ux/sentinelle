@@ -38,8 +38,8 @@ if (keystorePropertiesFile.exists()) {
 // Deliberately not derived from `git rev-list --count`: the CI checkout is
 // shallow, which would collapse the count to 1, and this repo's history
 // has been lost once already.
-val appVersionCode = 2
-val appVersionName = "1.0.0-alpha02"
+val appVersionCode = 3
+val appVersionName = "1.0.0-alpha03"
 
 android {
     namespace = "com.sentinelle.app"

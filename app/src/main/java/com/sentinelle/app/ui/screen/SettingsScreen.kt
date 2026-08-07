@@ -341,15 +341,28 @@ fun SettingsScreen(
                             title = "Ajouter le widget à l'écran d'accueil",
                             icon = Icons.Rounded.Widgets,
                             onClick = {
-                                val pinned = SentinelleWidgetProvider.requestPin(context)
-                                if (!pinned) {
-                                    Toast
-                                        .makeText(
-                                            context,
-                                            "Ajoute-le manuellement : appui long sur l'écran d'accueil → Widgets → Sentinelle",
-                                            Toast.LENGTH_LONG,
-                                        ).show()
-                                }
+                                val requested = SentinelleWidgetProvider.requestPin(context)
+                                // The manual route is always spelled out, even
+                                // when the request went through. requestPin only
+                                // reports that the system was *asked* — there is
+                                // no callback for a refusal, and some launchers
+                                // (MIUI especially) auto-dismiss the dialog on a
+                                // timer and then suppress every later request
+                                // until the app is reinstalled. Staying silent
+                                // in that case left the user with a button that
+                                // visibly does nothing and no way forward.
+                                Toast
+                                    .makeText(
+                                        context,
+                                        if (requested) {
+                                            "Si la fenêtre d'ajout n'apparaît pas : appui long sur l'écran " +
+                                                "d'accueil → Widgets → Sentinelle."
+                                        } else {
+                                            "Ajoute-le manuellement : appui long sur l'écran d'accueil → " +
+                                                "Widgets → Sentinelle."
+                                        },
+                                        Toast.LENGTH_LONG,
+                                    ).show()
                             },
                         ),
                         SettingsItem.Action(

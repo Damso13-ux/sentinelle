@@ -49,8 +49,14 @@ class SentinelleWidgetProvider : AppWidgetProvider() {
         /**
          * Asks the launcher to pin the widget directly, skipping the manual
          * "long-press home screen → Widgets → find Sentinelle → drag" flow.
-         * Not every launcher supports this (some MIUI versions don't) — returns
-         * false so the caller can show a fallback explanation.
+         *
+         * The returned value only says whether the launcher was *asked*, not
+         * whether the widget was added: requestPinAppWidget has no refusal
+         * callback. A `true` here is compatible with the user never seeing a
+         * dialog at all — MIUI puts an auto-dismiss countdown on its confirm
+         * dialog and, once it lapses, silently drops every later request from
+         * the same install. Callers must therefore always surface the manual
+         * route too, never treat `true` as success.
          */
         fun requestPin(context: Context): Boolean =
             try {
