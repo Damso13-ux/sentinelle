@@ -2,7 +2,7 @@ Sentinelle est une application Android qui vous protège des appels et SMS indé
 
 <b>Fonctionnalités :</b>
 • Bloque automatiquement les numéros et SMS de spam
-• Tableau de bord statistique et historique local des appels/SMS bloqués
+• Écran Activité : historique local des appels et SMS bloqués, avec la raison de chaque blocage
 • Détection heuristique de spam sur l'appareil, sans que rien ne sorte de l'appareil
 • Application Android native avec une interface Material Design 3 moderne
 • Respectueuse de la vie privée : rien n'est envoyé hors de l'appareil ; l'historique local utilisé pour le score est optionnel et reste local
@@ -12,11 +12,13 @@ Sentinelle est une application Android qui vous protège des appels et SMS indé
 Sentinelle donne la priorité à votre vie privée. L'application fonctionne localement sur votre appareil et ne collecte ni n'envoie jamais votre liste de contacts, votre journal d'appels ou vos données personnelles. Toute la détection de spam — y compris le score heuristique optionnel — est effectuée entièrement sur l'appareil.
 
 <b>Comment ça marche :</b>
-L'application utilise le service de filtrage d'appels d'Android pour identifier et bloquer automatiquement les numéros de spam connus avant qu'ils puissent vous déranger. Lorsqu'un appel arrive, Sentinelle vérifie le numéro dans sa base de données locale et, en option, son score heuristique, puis le bloque s'il est identifié comme spam.
+L'application utilise le service de filtrage d'appels d'Android pour identifier et bloquer automatiquement les numéros indésirables avant qu'ils puissent vous déranger. Lorsqu'un appel arrive, Sentinelle vérifie le numéro dans sa base locale et, si vous l'avez activé, son score heuristique, puis le bloque s'il est identifié comme indésirable.
+
+Pour les SMS, Android n'expose pas d'équivalent : Sentinelle masque la notification des messages indésirables via l'accès aux notifications. Le SMS lui-même reste dans votre application de messagerie.
 
 <b>Exigences :</b>
 • Android 10 (niveau API 29) ou supérieur
-• Permission d'être définie comme application Téléphone par défaut pour le filtrage d'appels
+• Autorisation de filtrage des appels (rôle « Filtrage des appels » d'Android). Sentinelle n'a pas besoin d'être votre application Téléphone par défaut, n'accède pas à votre journal d'appels et n'écoute jamais vos conversations.
 
 <b>Open Source :</b>
 Sentinelle est un logiciel open source et une œuvre dérivée de Saracroche (GPLv3) par cbouvat. Vous pouvez examiner le code, contribuer ou le compiler vous-même à partir du code source.
