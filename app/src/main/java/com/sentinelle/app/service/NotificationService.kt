@@ -12,6 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.sentinelle.app.MainActivity
 import com.sentinelle.app.R
 import com.sentinelle.app.receiver.UnblockActionReceiver
+import com.sentinelle.app.ui.formatPhoneNumberForDisplay
 import com.sentinelle.app.util.NotificationUtils
 
 object NotificationService {
@@ -57,7 +58,12 @@ object NotificationService {
         Log.d(TAG, "Sending blocked-call notification")
 
         val notificationId = "$phoneNumber-${System.currentTimeMillis()}".hashCode()
-        val contentText = if (label != null) "$label · $phoneNumber" else phoneNumber
+        // Même règle que pour l'appel identifié : le numéro sous la forme
+        // qu'on lit, pas l'E.164 brut. On retombe sur la chaîne d'origine
+        // quand le numéro n'a pas pu être normalisé (appel masqué, format
+        // inattendu).
+        val displayNumber = normalizedPhoneNumber?.let { formatPhoneNumberForDisplay(it) } ?: phoneNumber
+        val contentText = if (label != null) "$label · $displayNumber" else displayNumber
 
         val notification =
             NotificationCompat
@@ -142,6 +148,7 @@ object NotificationService {
         context: Context,
         phoneNumber: String,
         patternName: String,
+        normalizedPhoneNumber: Long? = null,
     ) {
         Log.d(TAG, "Sending identified-call notification ($patternName)")
 
@@ -152,7 +159,16 @@ object NotificationService {
                 .Builder(context, NotificationUtils.ALLOWED_CALLS_CHANNEL_ID)
                 .setSmallIcon(NOTIFICATION_ICON)
                 .setContentTitle("Appel identifié")
-                .setContentText("$patternName - $phoneNumber")
+                // Le numéro d'abord : c'est ce que la personne cherche à
+                // savoir en regardant sa notification. patternName est un
+                // libellé de rangement — « Autorisé depuis la recherche »,
+                // « Débloqué depuis une notification » — utile dans la liste
+                // pour savoir d'où vient l'entrée, mais qui parle de la
+                // mécanique de l'app plutôt que de l'appel.
+                .setContentText(
+                    "${normalizedPhoneNumber?.let { formatPhoneNumberForDisplay(it) } ?: phoneNumber} " +
+                        "· dans vos numéros autorisés",
+                )
                 .setPriority(NotificationUtils.ALLOWED_CALLS_NOTIFICATION_PRIORITY)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
 

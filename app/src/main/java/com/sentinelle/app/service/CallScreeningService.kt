@@ -193,7 +193,7 @@ class CallScreeningService : CallScreeningService() {
             Log.d(TAG, "Allowing call")
             respondToCall(callDetails, CallResponse.Builder().build())
             if (allowedPatternName != null) {
-                NotificationService.sendAllowedCallNotification(this, rawPhoneNumber ?: "", allowedPatternName)
+                NotificationService.sendAllowedCallNotification(this, rawPhoneNumber ?: "", allowedPatternName, phoneNumber)
             }
             maybeShowCallerIdBubble(phoneNumber, rawPhoneNumber, allowedPatternName)
         }
