@@ -171,6 +171,48 @@ Worth repeating for any future change to `proguard-rules.pro`: test a real
 release build on a device before uploading. `-PuseDebugSigningForRelease`
 makes that possible on a machine without the signing key.
 
+## Sécurité des données — réponses effectivement saisies
+
+Saisi dans Play Console le 7 août 2026. Conservé ici parce que c'est une
+attestation : si Google la conteste plus tard, ou pour la prochaine
+version, il faut pouvoir retrouver le raisonnement.
+
+**Étape 2 — collecte et sécurité**
+- Collecte ou partage de données : **Oui** (UUID aléatoire à chaque
+  synchro de listes, numéro signalé via « Signaler »)
+- Chiffrement en transit : **Oui** (NetworkService n'utilise que HTTPS)
+- Création de compte : **aucune**
+- Connexion via comptes externes : **Non**
+- Moyen de demander la suppression : **Non** — les données partent vers
+  une infra tierce non contrôlée, promettre une suppression serait
+  intenable
+
+**Étape 3 — types de données**
+- Cochés : **Numéro de téléphone**, **ID de l'appareil**
+- Volontairement non cochés :
+  - *Messages (SMS)* — lus via NotificationListenerService mais traités
+    uniquement sur l'appareil. Play définit « collecter » comme
+    transmettre hors de l'appareil.
+  - *Infos financières / historique des achats* — corrige un brouillon
+    antérieur de ce fichier qui disait l'inverse. Sentinelle ne transmet
+    aucune donnée d'achat : Play traite la transaction, l'app lit
+    seulement l'état « acheté ou non ».
+
+**Étape 4 — numéro de téléphone**
+- Collectées **et** partagées. Le partage est la déclaration la plus
+  lourde : la fiche affichera « partage des données avec des tiers ».
+  C'est exact, `app.saracroche.org` appartient au projet Saracroche et
+  non au développeur ; l'exception « sous-traitant agissant pour votre
+  compte » ne s'applique pas, faute de contrat de traitement.
+- Traitement éphémère : Non (conservé dans la liste partagée)
+- Facultative : l'utilisateur choisit (le signalement est volontaire)
+- Objectifs, collecte et partage : fonctionnement de l'appli +
+  prévention des fraudes et sécurité
+
+**Étape 4 — ID de l'appareil** : mêmes réponses, sauf que la collecte est
+**requise** — elle a lieu à chaque synchronisation, sans action de
+l'utilisateur.
+
 ## Status: ready to submit
 
 All repo-side prep is done — AAB, store assets, screenshots, privacy policy,
