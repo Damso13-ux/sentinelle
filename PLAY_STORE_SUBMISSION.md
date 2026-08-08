@@ -121,6 +121,51 @@ build is decided by the Play Console track it's uploaded to. Keeping the
 two aligned just avoids confusion about which build a tester is running —
 worth it, since testers report bugs by version name.
 
+### Un versionCode est brûlé dès l'upload, pas à la publication
+
+Vécu le 8 août 2026. Un AAB en versionCode 3 est importé, la release
+n'est jamais envoyée pour examen. À la tentative suivante, Play refuse :
+
+> Le code de version 3 a déjà été utilisé. Choisissez-en un autre.
+
+**Le compteur est consommé au moment où le bundle atteint Play**, pas
+quand la release est soumise ni publiée. Abandonner la release, supprimer
+le brouillon, ne rien envoyer : rien ne le libère, et il n'existe aucun
+moyen de le récupérer. Il a fallu reconstruire en versionCode 4 —
+`appVersionName` restant à `1.0.0-alpha03` puisque le contenu était
+identique, ce que le bloc de versioning de `app/build.gradle.kts` prévoit
+explicitement.
+
+Conséquence pratique : **ne jamais compter les versionCodes comme des
+publications**. Après deux envois réels, on en était déjà au 4. En cas de
+doute sur ce qui est parti, lire l'activité d'envoi, jamais le numéro.
+
+### Reconnaître une release qui n'a pas de bundle
+
+Trois signaux, tous vus le même soir :
+
+- la piste affiche **« Release sans nom »** en brouillon — Play nomme une
+  release d'après son bundle, donc l'absence de nom signale l'absence de
+  bundle ;
+- la page de préparation dit *« Aucun app bundle de votre précédente
+  release ne sera inclus dans celle-ci »* ;
+- le bouton **Suivant** est grisé, et le champ « Nom de la version » est
+  vide alors qu'il est normalement pré-rempli.
+
+Dans cet état, Play réclame le nom de la release. C'est un symptôme, pas
+la cause : remplir le nom ne débloque rien tant que le bundle manque.
+
+**Piège associé.** La section « Non inclus » propose un lien *Inclure* à
+côté du bundle de la release précédente. Cliquer dessus produit une
+release valide — mais qui redéploie l'ancienne version sous un nouveau
+numéro. Les testeurs ne reçoivent rien de neuf, et rien ne le signale.
+
+### Notes de version : 500 caractères par langue
+
+Dépassement silencieux jusqu'à la validation, qui répond alors
+« La note de version pour fr-FR est trop longue ». Compter avant de
+coller, ou raccourcir dès le premier refus.
+
 ## In-app purchase ("Sentinelle Pro") — Play Console setup
 
 Client-side plumbing is done (`BillingManager`, gated features, price display,
