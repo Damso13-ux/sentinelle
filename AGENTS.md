@@ -43,6 +43,62 @@ n'a pas la clé, utiliser `-PuseDebugSigningForRelease` (voir
 `app/build.gradle.kts`) : l'APK est alors signé avec la clé de debug,
 installable, mais rejeté par Play.
 
+### Installer la clé de release sur une nouvelle machine
+
+Deux fichiers, aucun des deux dans le dépôt (`.gitignore` bloque
+`keystore.properties`, `*.jks` et `*.keystore`) :
+
+1. **le keystore** `sentinelle-release.jks` ;
+2. **`keystore.properties`**, à la racine du dépôt, qui pointe dessus.
+
+Le keystore et son mot de passe sont des secrets. Les transférer par un
+moyen que l'on maîtrise — clé USB, gestionnaire de mots de passe,
+dossier chiffré. **Jamais par e-mail, messagerie, ticket, ni dans une
+conversation avec un assistant** : ce qui y passe y reste écrit.
+
+Sur la nouvelle machine :
+
+```bash
+# 1. déposer le .jks hors du dépôt, par exemple :
+#    ~/.android-signing/sentinelle-release.jks
+# 2. créer keystore.properties à la racine du dépôt
+```
+
+```properties
+storeFile=/chemin/absolu/vers/sentinelle-release.jks
+storePassword=…
+keyAlias=…
+keyPassword=…
+```
+
+Sous Windows, échapper les antislashs (`C:\\Users\\…`) ou utiliser des
+slashs — c'est un fichier `.properties`, pas un chemin shell.
+
+**Vérifier que c'est la bonne clé** avant de perdre du temps sur un envoi
+refusé. Construire un APK release et lire son certificat :
+
+```bash
+./gradlew assembleRelease
+apksigner verify --print-certs app/build/outputs/apk/release/app-release.apk
+```
+
+Le SHA-256 doit être `2324b0aa…d451` — l'empreinte de la clé
+d'importation, visible dans Play Console → Signature d'application. Toute
+autre valeur signifie que le keystore ou l'alias n'est pas le bon, et Play
+rejettera l'envoi.
+
+`apksigner` a besoin de `JAVA_HOME`. Si le shell ne l'a pas :
+
+```bash
+export JAVA_HOME="/chemin/vers/Android Studio/jbr"
+```
+
+**Perdre la clé d'importation n'est pas fatal.** Play App Signing est
+activé : la clé qui signe ce que reçoivent les utilisateurs appartient à
+Google et n'est pas sur nos machines. En cas de perte, on demande une
+réinitialisation de la clé d'importation à Google. À ne pas provoquer pour
+autant — la procédure prend plusieurs jours.
+
 **Clé de debug.** Générée automatiquement dans `~/.android/debug.keystore`,
 **propre à chaque machine**. Conséquence concrète en travaillant sur
 plusieurs postes : un APK construit sur la machine A ne peut pas se
